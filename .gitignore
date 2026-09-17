@@ -38,6 +38,14 @@ nativeapp/*.mobileprovision
 server/uploads/*
 !server/uploads/.gitkeep
 
+# ML-Service (Python)
+ML-Service/venv/
+ML-Service/__pycache__/
+ML-Service/**/__pycache__/
+ML-Service/data/*
+!ML-Service/data/.gitkeep
+ML-Service/*.pt
+
 # editor
 .vscode/
 .kilo/
