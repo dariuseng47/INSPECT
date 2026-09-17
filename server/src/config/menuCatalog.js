@@ -41,10 +41,43 @@ export const MENU_MODULES = [
     actions: VIEW,
     roleDefaults: { ADMIN: VIEW },
   },
+  {
+    base: 'web.phone.scan',
+    channel: 'web',
+    category: 'phone',
+    label: 'ตรวจสอบรุ่นโทรศัพท์',
+    actions: VIEW_EDIT,
+    roleDefaults: { ADMIN: VIEW_EDIT, OPERATOR: VIEW_EDIT },
+  },
+  {
+    base: 'web.phone.models',
+    channel: 'web',
+    category: 'phone',
+    label: 'ข้อมูลรุ่นโทรศัพท์',
+    actions: VIEW_EDIT,
+    roleDefaults: { ADMIN: VIEW_EDIT },
+  },
+  {
+    base: 'web.phone.queue',
+    channel: 'web',
+    category: 'phone',
+    label: 'คิวตรวจสอบ',
+    actions: VIEW_EDIT,
+    roleDefaults: { ADMIN: VIEW_EDIT },
+  },
+  {
+    base: 'web.phone.history',
+    channel: 'web',
+    category: 'phone',
+    label: 'ประวัติการสแกน',
+    actions: VIEW,
+    roleDefaults: { ADMIN: VIEW, OPERATOR: VIEW },
+  },
 ];
 
 const CATEGORY_LABELS = {
   security: 'ความปลอดภัย & ตั้งค่าระบบ',
+  phone: 'ตรวจสอบรุ่นโทรศัพท์',
 };
 
 export function categoryLabel(category) {
@@ -69,6 +102,6 @@ export const MENU_PERMISSIONS = MENU_MODULES.flatMap((mod) =>
 export const MENU_PERMISSION_KEYS = new Set(MENU_PERMISSIONS.map((p) => p.key));
 
 // role_default_permissions ที่ควรมีในระบบ (ใช้โดย migration seed และ test)
-export const ROLE_DEFAULT_MENU_PERMISSIONS = ['ADMIN'].flatMap((role) =>
+export const ROLE_DEFAULT_MENU_PERMISSIONS = ['ADMIN', 'OPERATOR'].flatMap((role) =>
   MENU_PERMISSIONS.filter((p) => p.isRoleDefault(role)).map((p) => ({ role, permKey: p.key }))
 );

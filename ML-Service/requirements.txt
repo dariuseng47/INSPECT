@@ -1,0 +1,12 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+pillow==10.4.0
+numpy==1.26.4
+requests==2.32.3
+psutil==6.0.0
+
+# CPU-only builds — ดู README สำหรับคำสั่งติดตั้งที่ระบุ --index-url ของ PyTorch CPU
+torch==2.4.1
+transformers==4.44.2
+ultralytics==8.2.103

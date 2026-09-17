@@ -1,0 +1,16 @@
+[Unit]
+Description=Inspect ML-Service (FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/ml-service
+EnvironmentFile=/opt/ml-service/.env
+ExecStart=/opt/ml-service/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${ML_SERVICE_APP_PORT}
+Restart=on-failure
+RestartSec=5
+# กัน OOM-kill ตัว process หลักไปฆ่า service อื่นบนเครื่องเดียวกัน — จำกัด RAM ไว้ที่ ~3GB (เครื่องมี 3.8GB)
+MemoryMax=3G
+
+[Install]
+WantedBy=multi-user.target

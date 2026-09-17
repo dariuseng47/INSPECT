@@ -30,6 +30,9 @@ const envSchema = z.object({
   // server/src/utils/pin.js (ต้อง deterministic เพื่อ lookup + UNIQUE constraint ได้ตรงๆ
   // ต่างจาก password ที่ใช้ bcrypt สุ่ม salt)
   PIN_PEPPER: z.string().min(32, 'PIN_PEPPER ต้องมีความยาวอย่างน้อย 32 ตัวอักษร'),
+
+  ML_SERVICE_URL: z.string().url('ML_SERVICE_URL ต้องเป็น URL เต็ม เช่น http://host:8000'),
+  ML_SERVICE_API_KEY: z.string().min(1, 'ML_SERVICE_API_KEY ห้ามว่าง — กรอกใน server/.env'),
 });
 
 const parsed = envSchema.safeParse(process.env);
