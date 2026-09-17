@@ -4,8 +4,6 @@
 import { thTH as thTHCore } from '@mui/material/locale';
 // date pickers (MUI ยังไม่มี locale ไทยของแพ็กเกจนี้ ใช้ enUS แทน)
 import { enUS as enUSDate } from '@mui/x-date-pickers/locales';
-// data grid (MUI ยังไม่มี locale ไทยของแพ็กเกจนี้ ใช้ enUS แทน)
-import { enUS as enUSDataGrid } from '@mui/x-data-grid/locales';
 
 // ----------------------------------------------------------------------
 
@@ -19,7 +17,7 @@ export const allLangs = [
     adapterLocale: 'th',
     numberFormat: { code: 'th-TH', currency: 'THB' },
     systemValue: {
-      components: { ...thTHCore.components, ...enUSDate.components, ...enUSDataGrid.components },
+      components: { ...thTHCore.components, ...enUSDate.components },
     },
   },
 ];
