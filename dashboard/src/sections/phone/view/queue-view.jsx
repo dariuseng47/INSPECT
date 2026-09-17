@@ -25,6 +25,8 @@ import { useGetPhoneModels } from 'src/actions/phoneModels';
 import { useGetQueue, addExtraImages, resolveQueueItem, rejectQueueItem } from 'src/actions/unidentifiedQueue';
 import { resolveUploadUrl } from 'src/utils/resolve-upload-url';
 
+import { DashboardContent } from 'src/layouts/dashboard';
+
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { Form, Field } from 'src/components/hook-form';
@@ -246,7 +248,7 @@ export function UnidentifiedQueueView() {
   const { items, queueLoading, queueEmpty, refreshQueue } = useGetQueue('pending');
 
   return (
-    <>
+    <DashboardContent maxWidth="xl">
       <CustomBreadcrumbs heading="คิวตรวจสอบ" links={[{ name: 'ตรวจสอบรุ่นโทรศัพท์' }, { name: 'คิวตรวจสอบ' }]} sx={{ mb: { xs: 2, md: 3 } }} />
 
       <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
@@ -267,6 +269,6 @@ export function UnidentifiedQueueView() {
           ))}
         </Stack>
       )}
-    </>
+    </DashboardContent>
   );
 }

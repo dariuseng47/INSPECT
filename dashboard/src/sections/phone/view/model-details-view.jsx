@@ -24,6 +24,8 @@ import {
   deletePhoneModelImage,
 } from 'src/actions/phoneModels';
 
+import { DashboardContent } from 'src/layouts/dashboard';
+
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { LoadingScreen } from 'src/components/loading-screen';
@@ -77,7 +79,7 @@ export function PhoneModelDetailsView({ id }) {
   if (!model) return null;
 
   return (
-    <>
+    <DashboardContent maxWidth="xl">
       <CustomBreadcrumbs
         heading={`${model.brand} ${model.model_name}`}
         links={[
@@ -231,6 +233,6 @@ export function PhoneModelDetailsView({ id }) {
           กลับไปหน้ารายการรุ่น
         </Button>
       </Box>
-    </>
+    </DashboardContent>
   );
 }

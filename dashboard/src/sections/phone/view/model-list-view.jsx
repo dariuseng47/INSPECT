@@ -33,6 +33,8 @@ import {
   reindexPhoneModels,
 } from 'src/actions/phoneModels';
 
+import { DashboardContent } from 'src/layouts/dashboard';
+
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
@@ -151,7 +153,7 @@ export function PhoneModelListView() {
   };
 
   return (
-    <>
+    <DashboardContent maxWidth="xl">
       <CustomBreadcrumbs
         heading="ข้อมูลรุ่นโทรศัพท์"
         links={[{ name: 'ตรวจสอบรุ่นโทรศัพท์' }, { name: 'ข้อมูลรุ่นโทรศัพท์' }]}
@@ -254,6 +256,6 @@ export function PhoneModelListView() {
           </Button>
         }
       />
-    </>
+    </DashboardContent>
   );
 }

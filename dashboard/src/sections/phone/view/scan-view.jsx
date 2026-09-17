@@ -21,6 +21,8 @@ import { RouterLink } from 'src/routes/components';
 import { createScan } from 'src/actions/scans';
 import { resolveUploadUrl } from 'src/utils/resolve-upload-url';
 
+import { DashboardContent } from 'src/layouts/dashboard';
+
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
@@ -110,7 +112,7 @@ export function PhoneScanView() {
   };
 
   return (
-    <>
+    <DashboardContent maxWidth="xl">
       <CustomBreadcrumbs
         heading="ตรวจสอบรุ่นโทรศัพท์"
         links={[{ name: 'ตรวจสอบรุ่นโทรศัพท์' }]}
@@ -192,7 +194,7 @@ export function PhoneScanView() {
           ))}
         </Stack>
       )}
-    </>
+    </DashboardContent>
   );
 }
 

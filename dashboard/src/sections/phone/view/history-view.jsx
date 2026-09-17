@@ -25,6 +25,8 @@ import { resolveUploadUrl } from 'src/utils/resolve-upload-url';
 import { useGetReviewLogs } from 'src/actions/reviewLogs';
 import { useGetScanBatch, useGetScanBatches } from 'src/actions/scans';
 
+import { DashboardContent } from 'src/layouts/dashboard';
+
 import { Scrollbar } from 'src/components/scrollbar';
 import { EmptyContent } from 'src/components/empty-content';
 import { LoadingScreen } from 'src/components/loading-screen';
@@ -125,7 +127,7 @@ export function ScanHistoryView() {
   const [tab, setTab] = useState('batches');
 
   return (
-    <>
+    <DashboardContent maxWidth="xl">
       <CustomBreadcrumbs heading="ประวัติการสแกน" links={[{ name: 'ตรวจสอบรุ่นโทรศัพท์' }, { name: 'ประวัติการสแกน' }]} sx={{ mb: { xs: 2, md: 3 } }} />
 
       <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 2 }}>
@@ -173,6 +175,6 @@ export function ScanHistoryView() {
       {tab === 'reviewLogs' && <Card><ReviewLogsTable /></Card>}
 
       {selectedId && <BatchDetailDialog id={selectedId} onClose={() => setSelectedId(null)} />}
-    </>
+    </DashboardContent>
   );
 }
