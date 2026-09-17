@@ -1,0 +1,43 @@
+# OS
+.DS_Store
+
+# dependencies
+node_modules/
+
+# env files (contain secrets)
+.env
+.env.*
+!.env.example
+
+# dashboard (Next.js)
+dashboard/.next/
+dashboard/.swc/
+dashboard/out/
+dashboard/dist/
+dashboard/build/
+dashboard/coverage/
+dashboard/.vercel/
+dashboard/.eslintcache
+dashboard/tsconfig.tsbuildinfo
+
+# nativeapp (Expo)
+nativeapp/.expo/
+nativeapp/dist/
+nativeapp/web-build/
+nativeapp/expo-env.d.ts
+nativeapp/android/.gradle/
+nativeapp/android/local.properties
+nativeapp/*.orig.*
+nativeapp/*.jks
+nativeapp/*.p8
+nativeapp/*.p12
+nativeapp/*.key
+nativeapp/*.mobileprovision
+
+# server uploads (runtime data, not source)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# editor
+.vscode/
+.kilo/

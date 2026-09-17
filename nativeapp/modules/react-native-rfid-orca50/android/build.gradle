@@ -1,0 +1,46 @@
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+apply plugin: 'com.android.library'
+
+def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0].toInteger()
+def shouldUseNameSpace = agpVersion >= 7
+
+android {
+    compileSdkVersion safeExtGet('compileSdkVersion', 36)
+
+    if (shouldUseNameSpace) {
+        namespace = "com.reactlibrary"
+    }
+
+    defaultConfig {
+        minSdkVersion safeExtGet('minSdkVersion', 24)
+        targetSdkVersion safeExtGet('targetSdkVersion', 36)
+    }
+    lintOptions {
+        abortOnError false
+    }
+    sourceSets.main {
+        // Vendor SDK's native libs only ship for armeabi-v7a (the Orca 50's Cortex-A17 CPU is
+        // 32-bit ARM) — see modules/react-native-rfid-orca50/README.md for the arm64 build note.
+        jniLibs.srcDir 'jniLibs'
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    maven {
+        // React Native's JS/Android binaries are installed from npm — resolve the local copy
+        // instead of a remote Maven repo (mirrors node_modules/@react-native-masked-view pattern)
+        url "$rootDir/../node_modules/react-native/android"
+    }
+}
+
+dependencies {
+    implementation 'com.facebook.react:react-native:+'
+    implementation files('libs/jxl.jar')
+    implementation files('libs/Serialport-module.jar')
+    implementation files('libs/xdl2d&RFID.jar')
+}

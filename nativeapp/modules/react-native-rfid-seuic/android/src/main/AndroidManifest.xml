@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- ไม่ต้องมี <uses-library com.seuic.uhf> — คลาส SDK อยู่ใน boot classpath ของ ROM UTouch 2
+         (ดู UHFTool/app/src/main/AndroidManifest.xml ของ SDK ที่คอมเมนต์บรรทัดนี้ทิ้ง) การใส่
+         uses-library ที่ไม่มีจริงบนมือถือรุ่นอื่นจะทำให้ติดตั้งไม่ได้ -->
+</manifest>

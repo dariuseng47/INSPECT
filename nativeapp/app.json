@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "WelGroup LMS",
+    "slug": "welgroup-lms",
+    "scheme": "welgroup-lms",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FFFFFF",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#EAF3EC",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.anonymous.welgrouplms"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "แอปต้องเข้าถึงคลังรูปภาพเพื่อแนบรูปตอนแจ้งพัก/ชำรุดผ้า",
+          "cameraPermission": "แอปต้องเข้าถึงกล้องเพื่อถ่ายรูปตอนแจ้งพัก/ชำรุดผ้า"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/logo/welgroup-logo.jpg",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ]
+  }
+}

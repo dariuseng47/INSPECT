@@ -1,0 +1,11 @@
+{
+  "name": "react-native-rfid-seuic",
+  "version": "1.0.0",
+  "description": "SEUIC AUTOID UTouch 2 built-in UHF RFID + trigger-key bridge (com.seuic.uhf / com.seuic.scankey system SDK) for React Native. Android-only — the UTouch 2 is the handheld itself, not a Bluetooth accessory.",
+  "main": "index.js",
+  "keywords": ["react-native", "rfid", "seuic", "autoid", "utouch"],
+  "license": "ISC",
+  "peerDependencies": {
+    "react-native": "*"
+  }
+}

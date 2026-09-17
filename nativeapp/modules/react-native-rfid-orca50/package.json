@@ -1,0 +1,11 @@
+{
+  "name": "react-native-rfid-orca50",
+  "version": "1.0.0",
+  "description": "RodinBell Orca 50 built-in UHF RFID reader bridge (com.rfid.* vendor SDK) for React Native. Android-only — the Orca 50 is the handheld device itself, not a Bluetooth accessory.",
+  "main": "index.js",
+  "keywords": ["react-native", "rfid", "orca-50", "rodinbell"],
+  "license": "ISC",
+  "peerDependencies": {
+    "react-native": "*"
+  }
+}

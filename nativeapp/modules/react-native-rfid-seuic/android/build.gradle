@@ -1,0 +1,45 @@
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+apply plugin: 'com.android.library'
+
+def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0].toInteger()
+def shouldUseNameSpace = agpVersion >= 7
+
+android {
+    compileSdkVersion safeExtGet('compileSdkVersion', 36)
+
+    if (shouldUseNameSpace) {
+        // ต้องต่างจาก react-native-rfid-orca50 (com.reactlibrary) — คนละ R/BuildConfig
+        namespace = "com.reactlibrary.seuic"
+    }
+
+    defaultConfig {
+        minSdkVersion safeExtGet('minSdkVersion', 24)
+        targetSdkVersion safeExtGet('targetSdkVersion', 36)
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    maven {
+        // React Native's Android binaries มาจาก npm — resolve local copy (เหมือน orca50 module)
+        url "$rootDir/../node_modules/react-native/android"
+    }
+}
+
+dependencies {
+    implementation 'com.facebook.react:react-native:+'
+    // compileOnly เท่านั้น — คลาส com.seuic.uhf.* / com.seuic.scankey.* เป็น system framework
+    // ที่ ROM ของ UTouch 2 ให้มาแล้ว (system server com.seuic.uhfserver + scankeyservice) ถ้า
+    // ใส่เป็น implementation จะ duplicate class ตอน dex และไม่มีทางไป bind service จริง
+    // (อ้างอิง: UHFTool/app/build.gradle ของ SDK ก็ใช้ compileOnly ทั้งคู่ และ manifest คอมเมนต์
+    //  <uses-library com.seuic.uhf> ทิ้ง — แปลว่าอยู่ใน boot classpath ไม่ต้องประกาศ uses-library)
+    compileOnly files('libs/uhf.jar')
+    compileOnly files('libs/scankey.jar')
+}
