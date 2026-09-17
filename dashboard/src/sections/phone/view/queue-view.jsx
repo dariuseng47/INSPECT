@@ -23,6 +23,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { useGetPhoneModels } from 'src/actions/phoneModels';
 import { useGetQueue, addExtraImages, resolveQueueItem, rejectQueueItem } from 'src/actions/unidentifiedQueue';
+import { resolveUploadUrl } from 'src/utils/resolve-upload-url';
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
@@ -81,7 +82,7 @@ function ResolveDialog({ item, onClose, onDone }) {
     <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>ยืนยันรุ่นโทรศัพท์</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-        <Box component="img" src={item.crop_image_path} sx={{ width: '100%', borderRadius: 1.5, maxHeight: 220, objectFit: 'contain', bgcolor: 'background.neutral' }} />
+        <Box component="img" src={resolveUploadUrl(item.crop_image_path)} sx={{ width: '100%', borderRadius: 1.5, maxHeight: 220, objectFit: 'contain', bgcolor: 'background.neutral' }} />
 
         <ToggleButtonGroup exclusive value={mode} onChange={(e, v) => v && setMode(v)} size="small" fullWidth>
           <ToggleButton value="candidate" disabled={!item.candidate_model_ids.length}>
@@ -186,7 +187,7 @@ function QueueCard({ item, onResolved, onRejected }) {
   return (
     <Card sx={{ p: 2 }}>
       <Stack direction="row" spacing={2}>
-        <Box component="img" src={item.crop_image_path} sx={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 1.5 }} />
+        <Box component="img" src={resolveUploadUrl(item.crop_image_path)} sx={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 1.5 }} />
         <Stack spacing={0.5} sx={{ flex: 1 }}>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             ความมั่นใจ: {item.confidence_score != null ? `${Math.round(item.confidence_score * 100)}%` : 'ไม่มี candidate'}

@@ -19,6 +19,7 @@ import TableContainer from '@mui/material/TableContainer';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 import { createScan } from 'src/actions/scans';
+import { resolveUploadUrl } from 'src/utils/resolve-upload-url';
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
@@ -204,7 +205,7 @@ function BatchResultCard({ data, index, total }) {
         </Typography>
       )}
       <Card sx={{ p: 2 }}>
-        <Box component="img" src={data.batch.annotated_image_path} sx={{ width: '100%', borderRadius: 1.5 }} />
+        <Box component="img" src={resolveUploadUrl(data.batch.annotated_image_path)} sx={{ width: '100%', borderRadius: 1.5 }} />
       </Card>
 
       <Card>
@@ -224,7 +225,7 @@ function BatchResultCard({ data, index, total }) {
                 {data.items.map((item) => (
                   <TableRow key={item.id} hover>
                     <TableCell>
-                      <Box component="img" src={item.crop_image_path} sx={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 1 }} />
+                      <Box component="img" src={resolveUploadUrl(item.crop_image_path)} sx={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 1 }} />
                     </TableCell>
                     <TableCell>{item.brand ? `${item.brand} ${item.model_name}` : '—'}</TableCell>
                     <TableCell>{item.min_capacity_gb ? `${item.min_capacity_gb} GB` : '—'}</TableCell>

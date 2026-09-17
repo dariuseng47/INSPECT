@@ -16,8 +16,8 @@ import CardContent from '@mui/material/CardContent';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { CONFIG } from 'src/config-global';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { resolveUploadUrl } from 'src/utils/resolve-upload-url';
 import {
   updateLoginPopupImage,
   deleteLoginPopupImage,
@@ -37,10 +37,6 @@ import { ROLE_LABEL, ROLE_COLOR } from './user-list-shared';
 import { LoginPopupImageDialog } from './login-popup-image-dialog';
 
 // ----------------------------------------------------------------------
-
-// CONFIG.serverUrl มี /api/v1 ต่อท้ายอยู่แล้ว แต่รูปที่อัปโหลดเสิร์ฟจาก root ของ server ตรงๆ
-// (server/src/app.js: app.use('/uploads', ...)) — ต้องตัด /api/v1 ออกเหมือน fabric-hold-view.jsx
-const SERVER_ORIGIN = CONFIG.serverUrl.replace(/\/api\/v1\/?$/, '');
 
 export function LoginPopupImagesView() {
   const { user } = useAuthContext();
@@ -124,7 +120,7 @@ export function LoginPopupImagesView() {
                     <Box
                       component="img"
                       alt={`login-popup-${image.id}`}
-                      src={`${SERVER_ORIGIN}${image.image_url}`}
+                      src={resolveUploadUrl(image.image_url)}
                       sx={{ width: 1, height: 1, objectFit: 'contain' }}
                     />
                   </Box>

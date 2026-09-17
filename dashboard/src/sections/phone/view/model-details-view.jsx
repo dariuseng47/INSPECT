@@ -15,6 +15,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
+import { resolveUploadUrl } from 'src/utils/resolve-upload-url';
 
 import {
   useGetPhoneModel,
@@ -138,7 +139,7 @@ export function PhoneModelDetailsView({ id }) {
                   <Box sx={{ position: 'relative', borderRadius: 1.5, overflow: 'hidden' }}>
                     <Box
                       component="img"
-                      src={image.image_path}
+                      src={resolveUploadUrl(image.image_path)}
                       sx={{
                         width: '100%',
                         height: 140,

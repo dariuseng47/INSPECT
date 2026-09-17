@@ -20,6 +20,7 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 
 import { fDateTime } from 'src/utils/format-time';
+import { resolveUploadUrl } from 'src/utils/resolve-upload-url';
 
 import { useGetReviewLogs } from 'src/actions/reviewLogs';
 import { useGetScanBatch, useGetScanBatches } from 'src/actions/scans';
@@ -46,7 +47,7 @@ function BatchDetailDialog({ id, onClose }) {
           <LoadingScreen sx={{ height: 200 }} />
         ) : (
           <Stack spacing={2}>
-            <Box component="img" src={batch?.annotated_image_path} sx={{ width: '100%', borderRadius: 1.5 }} />
+            <Box component="img" src={resolveUploadUrl(batch?.annotated_image_path)} sx={{ width: '100%', borderRadius: 1.5 }} />
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
               {summary?.byCapacity.map((row) => (
                 <Chip key={row.capacityGb} size="small" variant="soft" color="primary" label={`${row.capacityGb} GB × ${row.count}`} />
