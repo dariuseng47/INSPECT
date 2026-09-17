@@ -12,7 +12,7 @@ import { logoClasses } from './classes';
 
 // ----------------------------------------------------------------------
 
-// โลโก้ WelGroup — ไฟล์ต้นฉบับเป็นภาพแนวนอน (อัตราส่วนประมาณ 3:1) ไม่มีไอคอนสี่เหลี่ยมจัตุรัสแยกต่างหาก
+// โลโก้ Inspect — ไฟล์ต้นฉบับเป็นภาพแนวนอน (อัตราส่วนประมาณ 2.6:1) ไม่มีไอคอนสี่เหลี่ยมจัตุรัสแยกต่างหาก
 // จึงใช้ภาพเดียวกันทั้ง isSingle และ full พร้อม object-fit: contain กันภาพบิดเบี้ยว
 export const Logo = forwardRef(
   (
@@ -22,8 +22,8 @@ export const Logo = forwardRef(
     const logoImage = (
       <Box
         component="img"
-        alt="WelGroup logo"
-        src={`${CONFIG.assetsDir}/logo/welgroup-logo.jpg`}
+        alt="Inspect logo"
+        src={`${CONFIG.assetsDir}/logo/inspect-logo.png`}
         sx={{ width: 1, height: 1, objectFit: 'contain' }}
       />
     );
