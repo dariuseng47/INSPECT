@@ -34,13 +34,21 @@ export async function drawAnnotations(imageBuffer, detections) {
 
   const boxesSvg = detections
     .map(({ x, y, w, h, color, label }) => {
-      const labelY = y > fontSize + 8 ? y - 8 : y + h + fontSize + 4;
+      // ป้ายชื่อวางไว้ "ด้านในกรอบ" เสมอ ชิดมุมบนซ้าย — เดิมพยายามวางไว้เหนือกรอบ/ใต้กรอบแทน
+      // ซึ่งถ้ากรอบชิดขอบภาพ (เช่น โทรศัพท์เต็มเฟรม) ป้ายจะโดนเบียดหลุดออกนอกภาพไปเลย
+      const labelHeight = fontSize * 1.4;
+      const labelWidth = Math.min(
+        Math.max(label.length * fontSize * 0.62, fontSize * 2) + 8,
+        w
+      );
+      const labelX = x;
+      const labelY = y;
       return `
         <rect x="${x}" y="${y}" width="${w}" height="${h}"
               fill="none" stroke="${color}" stroke-width="${strokeWidth}" />
-        <rect x="${x}" y="${labelY - fontSize}" width="${Math.max(label.length * fontSize * 0.62, fontSize * 2)}" height="${fontSize * 1.4}"
+        <rect x="${labelX}" y="${labelY}" width="${labelWidth}" height="${labelHeight}"
               fill="${color}" opacity="0.85" />
-        <text x="${x + 4}" y="${labelY}" font-family="sans-serif" font-size="${fontSize}"
+        <text x="${labelX + 4}" y="${labelY + labelHeight - fontSize * 0.3}" font-family="sans-serif" font-size="${fontSize}"
               font-weight="bold" fill="#ffffff">${escapeXml(label)}</text>
       `;
     })
