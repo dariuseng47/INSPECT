@@ -15,14 +15,11 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import DialogTitle from '@mui/material/DialogTitle';
-import ToggleButton from '@mui/material/ToggleButton';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-import { useGetHospitals } from 'src/actions/hospitals';
-import { updateUser, useGetMyHospitals } from 'src/actions/users';
+import { updateUser } from 'src/actions/users';
 import { useGetUserPermissions, updateUserPermissions } from 'src/actions/permissions';
 
 import { toast } from 'src/components/snackbar';
@@ -34,31 +31,23 @@ import { useAuthContext } from 'src/auth/hooks';
 // ----------------------------------------------------------------------
 
 const CATEGORY_LABELS = {
-  dashboard: 'แดชบอร์ดโรงพยาบาล',
-  operations: 'ปฏิบัติการ & ติดตามผ้า',
-  fabric: 'จัดการผ้าและล็อต',
-  structure: 'โครงสร้างโรงพยาบาล',
-  device: 'อุปกรณ์ & สัญญาณ RFID',
   security: 'ความปลอดภัย & ตั้งค่าระบบ',
-  inventory: 'คลังผ้า',
 };
 
 // รวม permission รายคีย์ view/edit เป็นโมดูลเดียว ต่อ 1 แถวในตาราง
-function toModules(permissions, channel) {
+function toModules(permissions) {
   const byBase = new Map();
-  permissions
-    .filter((p) => p.channel === channel)
-    .forEach((p) => {
-      if (!byBase.has(p.base)) {
-        byBase.set(p.base, {
-          base: p.base,
-          label: p.label,
-          category: p.category,
-          actions: {},
-        });
-      }
-      byBase.get(p.base).actions[p.action] = p;
-    });
+  permissions.forEach((p) => {
+    if (!byBase.has(p.base)) {
+      byBase.set(p.base, {
+        base: p.base,
+        label: p.label,
+        category: p.category,
+        actions: {},
+      });
+    }
+    byBase.get(p.base).actions[p.action] = p;
+  });
 
   const groups = new Map();
   [...byBase.values()].forEach((mod) => {
@@ -82,24 +71,15 @@ export function PermissionEditorDialog({ open, onClose, targetUser, onSaved }) {
 
   const {
     permissions,
-    scopes,
     handheldEnabled,
     canManageSubordinates,
     permissionsLoading,
     refreshPermissions,
   } = useGetUserPermissions(open ? targetUser?.id : undefined);
 
-  // รายชื่อโรงพยาบาลที่ "ผู้ตั้งค่า" มอบให้ได้ — superadmin เห็นทุกแห่ง, admin เห็นเฉพาะ scope ตัวเอง
-  const { hospitals: allHospitals } = useGetHospitals(open && isSuperadminActor);
-  const { myHospitals } = useGetMyHospitals(open && !isSuperadminActor);
-  const assignableHospitals = isSuperadminActor
-    ? allHospitals.map((h) => ({ id: h.id, name: h.name, canGrantEdit: true }))
-    : myHospitals.map((h) => ({ id: h.id, name: h.name, canGrantEdit: h.canEdit }));
-
   const [tab, setTab] = useState('web');
   const [permLocal, setPermLocal] = useState({});
   const [resetKeys, setResetKeys] = useState(() => new Set());
-  const [scopeLocal, setScopeLocal] = useState({}); // { [hospitalId]: 'none'|'view'|'edit' }
   const [handheldLocal, setHandheldLocal] = useState(true);
   const [manageLocal, setManageLocal] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -108,33 +88,20 @@ export function PermissionEditorDialog({ open, onClose, targetUser, onSaved }) {
     if (!open || permissionsLoading) return;
     setPermLocal(Object.fromEntries(permissions.map((p) => [p.key, p.effective])));
     setResetKeys(new Set());
-    setScopeLocal(
-      Object.fromEntries(scopes.map((s) => [s.hospitalId, s.canEdit ? 'edit' : 'view']))
-    );
     setHandheldLocal(!!handheldEnabled);
     setManageLocal(!!canManageSubordinates);
     setTab('web');
-  }, [open, permissionsLoading, permissions, scopes, handheldEnabled, canManageSubordinates]);
+  }, [open, permissionsLoading, permissions, handheldEnabled, canManageSubordinates]);
 
-  const webGroups = useMemo(() => toModules(permissions, 'web'), [permissions]);
-  const handheldGroups = useMemo(() => toModules(permissions, 'handheld'), [permissions]);
+  const webGroups = useMemo(() => toModules(permissions), [permissions]);
   const permByKey = useMemo(
     () => Object.fromEntries(permissions.map((p) => [p.key, p])),
     [permissions]
   );
 
-  const scopeDirty = useMemo(() => {
-    const orig = Object.fromEntries(
-      scopes.map((s) => [s.hospitalId, s.canEdit ? 'edit' : 'view'])
-    );
-    const ids = new Set([...Object.keys(orig), ...Object.keys(scopeLocal)]);
-    return [...ids].some((id) => (orig[id] ?? 'none') !== (scopeLocal[id] ?? 'none'));
-  }, [scopes, scopeLocal]);
-
   const hasChanges =
     resetKeys.size > 0 ||
     permissions.some((p) => permLocal[p.key] !== p.effective) ||
-    scopeDirty ||
     (!targetIsSuperadmin && handheldLocal !== !!handheldEnabled) ||
     (targetIsAdmin && isSuperadminActor && manageLocal !== !!canManageSubordinates);
 
@@ -155,13 +122,8 @@ export function PermissionEditorDialog({ open, onClose, targetUser, onSaved }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // 1) scope โรงพยาบาล + ธง handheld / สร้างพนักงาน -> PATCH /users/:id
+      // 1) ธง handheld / สร้างพนักงาน -> PATCH /users/:id
       const userPatch = {};
-      if (scopeDirty) {
-        userPatch.hospitalScopes = Object.entries(scopeLocal)
-          .filter(([, v]) => v !== 'none')
-          .map(([hospitalId, v]) => ({ hospitalId: Number(hospitalId), canEdit: v === 'edit' }));
-      }
       if (!targetIsSuperadmin && handheldLocal !== !!handheldEnabled) {
         userPatch.handheldEnabled = handheldLocal;
       }
@@ -197,8 +159,8 @@ export function PermissionEditorDialog({ open, onClose, targetUser, onSaved }) {
   };
 
   const renderModuleRow = (mod) => {
-    const {view} = mod.actions;
-    const {edit} = mod.actions;
+    const { view } = mod.actions;
+    const { edit } = mod.actions;
     const locked = (p) => p?.superadminLocked && !isSuperadminActor;
 
     return (
@@ -278,53 +240,11 @@ export function PermissionEditorDialog({ open, onClose, targetUser, onSaved }) {
         ) : (
           <>
             <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 2 }}>
-              {!targetIsSuperadmin && <Tab value="hospitals" label="โรงพยาบาล" />}
               <Tab value="web" label="เมนูเว็บ" />
-              <Tab value="handheld" label="เมนูมือถือ" />
-              {targetIsAdmin && isSuperadminActor && <Tab value="other" label="อื่นๆ" />}
+              {(!targetIsSuperadmin || (targetIsAdmin && isSuperadminActor)) && (
+                <Tab value="other" label="อื่นๆ" />
+              )}
             </Tabs>
-
-            {tab === 'hospitals' && !targetIsSuperadmin && (
-              <Stack spacing={1.5}>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  เลือกว่าบัญชีนี้เข้าถึงข้อมูลของโรงพยาบาลใดได้บ้าง และแต่ละแห่งให้ดูอย่างเดียว
-                  หรือแก้ไขได้
-                </Typography>
-                {assignableHospitals.length === 0 && (
-                  <Typography variant="body2" sx={{ color: 'text.disabled' }}>
-                    ไม่มีโรงพยาบาลให้มอบสิทธิ์
-                  </Typography>
-                )}
-                {assignableHospitals.map((h) => {
-                  const val = scopeLocal[h.id] ?? 'none';
-                  return (
-                    <Stack
-                      key={h.id}
-                      direction="row"
-                      alignItems="center"
-                      justifyContent="space-between"
-                      sx={{ py: 0.5 }}
-                    >
-                      <Typography variant="body2">{h.name}</Typography>
-                      <ToggleButtonGroup
-                        exclusive
-                        size="small"
-                        value={val}
-                        onChange={(e, v) => {
-                          if (v !== null) setScopeLocal((prev) => ({ ...prev, [h.id]: v }));
-                        }}
-                      >
-                        <ToggleButton value="none">ไม่มีสิทธิ์</ToggleButton>
-                        <ToggleButton value="view">ดูอย่างเดียว</ToggleButton>
-                        <ToggleButton value="edit" disabled={!h.canGrantEdit}>
-                          แก้ไขได้
-                        </ToggleButton>
-                      </ToggleButtonGroup>
-                    </Stack>
-                  );
-                })}
-              </Stack>
-            )}
 
             {tab === 'web' && (
               <Stack spacing={0.5}>
@@ -334,53 +254,49 @@ export function PermissionEditorDialog({ open, onClose, targetUser, onSaved }) {
                   permByKey={permByKey}
                   resetKeys={resetKeys}
                   onReset={resetPerm}
-                  channel="web"
                 />
                 {renderGroups(webGroups)}
               </Stack>
             )}
 
-            {tab === 'handheld' && (
+            {tab === 'other' && (
               <Stack spacing={1.5}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={handheldLocal}
-                      disabled={targetIsSuperadmin}
-                      onChange={(e) => setHandheldLocal(e.target.checked)}
-                    />
-                  }
-                  label={
-                    <Typography variant="subtitle2">
-                      อนุญาตให้ใช้งานเครื่องพกพา (handheld)
-                    </Typography>
-                  }
-                />
-                <Box sx={{ opacity: handheldLocal ? 1 : 0.4, pointerEvents: handheldLocal ? 'auto' : 'none' }}>
-                  {renderGroups(handheldGroups)}
-                </Box>
-              </Stack>
-            )}
+                {!targetIsSuperadmin && (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={handheldLocal}
+                        onChange={(e) => setHandheldLocal(e.target.checked)}
+                      />
+                    }
+                    label={
+                      <Typography variant="subtitle2">
+                        อนุญาตให้ใช้งานเครื่องพกพา (handheld)
+                      </Typography>
+                    }
+                  />
+                )}
 
-            {tab === 'other' && targetIsAdmin && isSuperadminActor && (
-              <Stack spacing={1.5}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={manageLocal}
-                      onChange={(e) => setManageLocal(e.target.checked)}
+                {targetIsAdmin && isSuperadminActor && (
+                  <>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={manageLocal}
+                          onChange={(e) => setManageLocal(e.target.checked)}
+                        />
+                      }
+                      label={
+                        <Typography variant="subtitle2">
+                          อนุญาตให้สร้าง / แก้ไข / ลบ พนักงาน (operator) ใต้ตัวเอง
+                        </Typography>
+                      }
                     />
-                  }
-                  label={
-                    <Typography variant="subtitle2">
-                      อนุญาตให้สร้าง / แก้ไข / ลบ พนักงาน (operator) ใต้ตัวเอง
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      พนักงานที่แอดมินคนนี้สร้าง จะได้สิทธิ์ไม่เกินสิทธิ์ของแอดมิน
                     </Typography>
-                  }
-                />
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  พนักงานที่แอดมินคนนี้สร้าง จะได้สิทธิ์ไม่เกินสิทธิ์ของแอดมิน — superadmin
-                  ปรับเพิ่มให้เกินเพดานได้จากหน้านี้ และค่าที่ superadmin ตั้งจะถูกล็อกไม่ให้แอดมินแก้ทับ
-                </Typography>
+                  </>
+                )}
               </Stack>
             )}
           </>
@@ -405,10 +321,9 @@ export function PermissionEditorDialog({ open, onClose, targetUser, onSaved }) {
 }
 
 // แถวสรุปคีย์ที่ถูกปรับเฉพาะบุคคล (override) + ปุ่มรีเซ็ตกลับค่าเริ่มต้นของบทบาท
-function PendingResetHint({ permissions, permLocal, permByKey, resetKeys, onReset, channel }) {
+function PendingResetHint({ permissions, permLocal, permByKey, resetKeys, onReset }) {
   const overridden = permissions.filter(
     (p) =>
-      p.channel === channel &&
       !resetKeys.has(p.key) &&
       p.source === 'override' &&
       permLocal[p.key] === permByKey[p.key]?.effective

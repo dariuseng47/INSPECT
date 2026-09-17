@@ -11,10 +11,8 @@ const swrOptions = {
   revalidateOnReconnect: false,
 };
 
-// hospitalId ไม่ส่ง = ไม่กรอง (superadmin เห็นทุก tenant, admin ถูกบังคับ tenant ตัวเองจาก backend อยู่แล้ว)
-export function useGetAuditLogs({ hospitalId, action, limit } = {}) {
+export function useGetAuditLogs({ action, limit } = {}) {
   const params = new URLSearchParams();
-  if (hospitalId) params.set('hospitalId', hospitalId);
   if (action) params.set('action', action);
   if (limit) params.set('limit', limit);
 

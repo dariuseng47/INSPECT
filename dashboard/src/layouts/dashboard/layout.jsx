@@ -9,7 +9,6 @@ import { iconButtonClasses } from '@mui/material/IconButton';
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import { allLangs } from 'src/locales';
-import { _notifications } from 'src/_mock';
 import { useGetMyPermissions } from 'src/actions/permissions';
 
 import { Logo } from 'src/components/logo';
@@ -32,7 +31,6 @@ import { StyledDivider, useNavColorVars } from './styles';
 import { SignOutButton } from '../components/sign-out-button';
 import { SettingsButton } from '../components/settings-button';
 import { LanguagePopover } from '../components/language-popover';
-import { NotificationsDrawer } from '../components/notifications-drawer';
 
 // ----------------------------------------------------------------------
 
@@ -158,8 +156,6 @@ export function DashboardLayout({ sx, children, header, data }) {
                   <Searchbar data={navData} />
                   {/* -- Language popover -- */}
                   <LanguagePopover data={allLangs} />
-                  {/* -- Notifications popover -- */}
-                  <NotificationsDrawer data={_notifications} />
                   {/* -- Settings button -- */}
                   <SettingsButton />
                   {/* -- Logout button -- */}

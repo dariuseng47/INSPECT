@@ -26,7 +26,6 @@ import TableContainer from '@mui/material/TableContainer';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useSocketEvent } from 'src/hooks/use-socket-event';
-import { useEffectiveHospital } from 'src/hooks/use-effective-hospital';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { createUser, useGetUsers } from 'src/actions/users';
@@ -38,7 +37,6 @@ import { Form, Field } from 'src/components/hook-form';
 import { EmptyContent } from 'src/components/empty-content';
 import { LoadingScreen } from 'src/components/loading-screen';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
-import { HospitalContextChip } from 'src/components/hospital-context-chip';
 
 import { useAuthContext } from 'src/auth/hooks';
 import { RoleBasedGuard } from 'src/auth/guard';
@@ -68,9 +66,7 @@ function buildSchema(isSuperadmin) {
   });
 }
 
-// สร้างบัญชี admin/staff ให้ "โรงพยาบาลที่กำลังเลือกอยู่" เสมอ (มาจาก sidebar switcher) — ไม่ต้อง
-// เลือกโรงพยาบาลซ้ำในฟอร์มอีกรอบ เพราะทั้งหน้านี้ถูกกรองตามโรงพยาบาลนั้นอยู่แล้ว
-function NewUserDialog({ open, onClose, onCreated, isSuperadmin, hospitalId }) {
+function NewUserDialog({ open, onClose, onCreated, isSuperadmin }) {
   const methods = useForm({
     resolver: zodResolver(buildSchema(isSuperadmin)),
     defaultValues: {
@@ -94,8 +90,8 @@ function NewUserDialog({ open, onClose, onCreated, isSuperadmin, hospitalId }) {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      const res = await createUser({ ...data, hospitalId });
-      toast.success('สร้างบัญชีแล้ว — ตั้งค่าสิทธิ์/โรงพยาบาล/handheld ต่อได้เลย');
+      const res = await createUser(data);
+      toast.success('สร้างบัญชีแล้ว — ตั้งค่าสิทธิ์/handheld ต่อได้เลย');
       reset();
       onCreated(res?.user ?? null);
       onClose();
@@ -142,15 +138,14 @@ function NewUserDialog({ open, onClose, onCreated, isSuperadmin, hospitalId }) {
 
 export function UserListView() {
   const { user } = useAuthContext();
-  const { hospitalId, isSuperadmin, hospitalsLoading } = useEffectiveHospital();
+  const isSuperadmin = user?.role === 'SUPERADMIN';
 
   const { users, usersLoading, usersEmpty, refreshUsers } = useGetUsers({
-    hospitalId,
     role: 'ADMIN,OPERATOR',
   });
 
   // ผู้ใช้คนไหน login/logout จากมือถือ(handheld)/เว็บ ตอนนี้ -> จุดสถานะอัปเดตสดไม่ต้องรีเฟรช
-  // (server/src/sockets/presence.js ยิง event นี้เข้าห้อง hospital:<id> เดียวกับที่ต่อ socket อยู่)
+  // (server/src/sockets/presence.js ยิง event นี้ให้ทุกคนที่ต่อ socket อยู่แบบ global)
   useSocketEvent('presence:update', () => {
     refreshUsers();
   });
@@ -189,7 +184,6 @@ export function UserListView() {
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
               onClick={dialog.onTrue}
-              disabled={!hospitalId}
             >
               สร้างบัญชีผู้ใช้
             </Button>
@@ -197,16 +191,7 @@ export function UserListView() {
           sx={{ mb: { xs: 2, md: 3 } }}
         />
 
-        <HospitalContextChip sx={{ mb: 2 }} />
-
-        {hospitalsLoading ? (
-          <LoadingScreen />
-        ) : !hospitalId ? (
-          <Card sx={{ p: 2 }}>
-            <EmptyContent title="กรุณาเลือกโรงพยาบาลก่อน" sx={{ py: 10 }} />
-          </Card>
-        ) : (
-          <Card>
+        <Card>
             {usersLoading ? (
               <LoadingScreen />
             ) : usersEmpty ? (
@@ -295,7 +280,7 @@ export function UserListView() {
                                     : row.role === 'OPERATOR') && (
                                     <IconButton
                                       onClick={() => openPermissions(row)}
-                                      title="ตั้งค่าสิทธิ์ / โรงพยาบาล / handheld"
+                                      title="ตั้งค่าสิทธิ์ / handheld"
                                     >
                                       <Iconify icon="solar:shield-user-bold-duotone" width={18} />
                                     </IconButton>
@@ -317,15 +302,13 @@ export function UserListView() {
                 </TableContainer>
               </Scrollbar>
             )}
-          </Card>
-        )}
+        </Card>
 
         <NewUserDialog
           open={dialog.value}
           onClose={dialog.onFalse}
           onCreated={handleCreated}
           isSuperadmin={isSuperadmin}
-          hospitalId={hospitalId}
         />
 
         <EditUserDialog

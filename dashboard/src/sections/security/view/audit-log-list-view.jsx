@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
@@ -15,8 +15,6 @@ import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 
-import { useEffectiveHospital } from 'src/hooks/use-effective-hospital';
-
 import { fDateTime } from 'src/utils/format-time';
 
 import { useGetAuditLogs } from 'src/actions/auditLogs';
@@ -27,7 +25,6 @@ import { Scrollbar } from 'src/components/scrollbar';
 import { EmptyContent } from 'src/components/empty-content';
 import { LoadingScreen } from 'src/components/loading-screen';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
-import { HospitalContextChip } from 'src/components/hospital-context-chip';
 
 import { useAuthContext } from 'src/auth/hooks';
 import { RoleBasedGuard } from 'src/auth/guard';
@@ -36,34 +33,30 @@ import { RoleBasedGuard } from 'src/auth/guard';
 
 const ACTION_META = {
   LOGIN: { label: 'เข้าสู่ระบบ', color: 'info', icon: 'solar:login-3-bold-duotone' },
+  LOGIN_PIN: { label: 'เข้าสู่ระบบ (PIN)', color: 'info', icon: 'solar:login-3-bold-duotone' },
   LOGOUT: { label: 'ออกจากระบบ', color: 'default', icon: 'solar:logout-3-bold-duotone' },
   USER_CREATED: { label: 'สร้างบัญชีผู้ใช้', color: 'success', icon: 'solar:user-plus-bold-duotone' },
   USER_UPDATED: { label: 'แก้ไขบัญชีผู้ใช้', color: 'warning', icon: 'solar:user-id-bold-duotone' },
   USER_DELETED: { label: 'ลบบัญชีผู้ใช้', color: 'error', icon: 'solar:user-cross-bold-duotone' },
-  HOSPITAL_CREATED: {
-    label: 'สร้างโรงพยาบาล',
-    color: 'success',
-    icon: 'solar:buildings-2-bold-duotone',
-  },
-  HOSPITAL_UPDATED: {
-    label: 'แก้ไขโรงพยาบาล',
-    color: 'warning',
-    icon: 'solar:buildings-2-bold-duotone',
-  },
-  HOSPITAL_DELETED: {
-    label: 'ลบโรงพยาบาล',
-    color: 'error',
-    icon: 'solar:buildings-2-bold-duotone',
-  },
   PERMISSION_UPDATED: {
     label: 'แก้ไขสิทธิ์การเข้าถึง',
     color: 'warning',
     icon: 'solar:shield-user-bold-duotone',
   },
-  CROSS_TENANT_READ: {
-    label: 'เข้าดูข้อมูลข้ามโรงพยาบาล',
-    color: 'info',
-    icon: 'solar:eye-bold-duotone',
+  LOGIN_POPUP_IMAGE_CREATED: {
+    label: 'เพิ่มรูป Popup หลัง Login',
+    color: 'success',
+    icon: 'solar:gallery-add-bold-duotone',
+  },
+  LOGIN_POPUP_IMAGE_UPDATED: {
+    label: 'แก้ไขรูป Popup หลัง Login',
+    color: 'warning',
+    icon: 'solar:gallery-edit-bold-duotone',
+  },
+  LOGIN_POPUP_IMAGE_DELETED: {
+    label: 'ลบรูป Popup หลัง Login',
+    color: 'error',
+    icon: 'solar:gallery-remove-bold-duotone',
   },
 };
 
@@ -79,13 +72,8 @@ function formatDetail(row) {
       return `${metadata?.username ?? '—'} (${metadata?.role ?? '—'})`;
     case 'USER_DELETED':
       return metadata?.username ?? '—';
-    case 'HOSPITAL_CREATED':
-    case 'HOSPITAL_UPDATED':
-      return metadata?.name ?? '—';
     case 'PERMISSION_UPDATED':
       return `แก้ไข ${metadata?.overrides?.length ?? 0} รายการ`;
-    case 'CROSS_TENANT_READ':
-      return `โรงพยาบาล #${metadata?.hospitalId ?? entityId ?? '—'}`;
     default:
       return entityType ? `${entityType}${entityId ? ` #${entityId}` : ''}` : '—';
   }
@@ -93,29 +81,18 @@ function formatDetail(row) {
 
 export function AuditLogListView() {
   const { user } = useAuthContext();
-  const isSuperadmin = user?.role === 'SUPERADMIN';
 
-  const { hospitals } = useEffectiveHospital();
-
-  const [hospitalFilter, setHospitalFilter] = useState('');
   const [actionFilter, setActionFilter] = useState('');
 
   const { auditLogs, auditLogsLoading, auditLogsEmpty } = useGetAuditLogs({
-    hospitalId: isSuperadmin ? hospitalFilter || undefined : undefined,
     action: actionFilter || undefined,
     limit: 200,
   });
-
-  const hospitalNameById = useMemo(
-    () => new Map(hospitals.map((h) => [h.id, h.name])),
-    [hospitals]
-  );
 
   return (
     <RoleBasedGuard hasContent currentRole={user?.role} acceptRoles={['SUPERADMIN', 'ADMIN']}>
       <DashboardContent maxWidth="xl">
         <Stack spacing={1} sx={{ mb: { xs: 3, md: 5 } }}>
-          {!isSuperadmin && <HospitalContextChip />}
           <CustomBreadcrumbs
             heading="ประวัติการใช้งานระบบ"
             links={[{ name: 'ความปลอดภัย & ตั้งค่าระบบ' }, { name: 'ประวัติการใช้งานระบบ' }]}
@@ -128,23 +105,6 @@ export function AuditLogListView() {
             spacing={2}
             sx={{ p: 2.5, borderBottom: '1px solid', borderColor: 'divider' }}
           >
-            {isSuperadmin && (
-              <TextField
-                select
-                label="โรงพยาบาล"
-                value={hospitalFilter}
-                onChange={(e) => setHospitalFilter(e.target.value)}
-                sx={{ minWidth: 220 }}
-              >
-                <MenuItem value="">ทุกโรงพยาบาล</MenuItem>
-                {hospitals.map((h) => (
-                  <MenuItem key={h.id} value={h.id}>
-                    {h.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            )}
-
             <TextField
               select
               label="การกระทำ"
@@ -175,7 +135,6 @@ export function AuditLogListView() {
                       <TableCell>ผู้ใช้</TableCell>
                       <TableCell>การกระทำ</TableCell>
                       <TableCell>รายละเอียด</TableCell>
-                      {isSuperadmin && <TableCell>โรงพยาบาล</TableCell>}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -207,11 +166,6 @@ export function AuditLogListView() {
                               {formatDetail(row)}
                             </Typography>
                           </TableCell>
-                          {isSuperadmin && (
-                            <TableCell>
-                              {row.hospital_name ?? hospitalNameById.get(row.hospital_id) ?? '—'}
-                            </TableCell>
-                          )}
                         </TableRow>
                       );
                     })}

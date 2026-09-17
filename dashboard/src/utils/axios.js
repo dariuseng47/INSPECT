@@ -7,134 +7,25 @@ import { STORAGE_KEY, SESSION_EXPIRES_KEY } from 'src/auth/context/jwt/constant'
 // ----------------------------------------------------------------------
 
 export const endpoints = {
-  chat: '/api/chat',
-  kanban: '/api/kanban',
-  calendar: '/api/calendar',
   auth: {
     me: '/auth/me',
     signIn: '/auth/login',
     logout: '/auth/logout',
     refresh: '/auth/refresh',
   },
-  hospitals: {
-    list: '/hospitals',
-    summary: '/hospitals/summary',
-    details: (id) => `/hospitals/${id}`,
-    dashboardSummary: (id) => `/hospitals/${id}/dashboard-summary`,
-  },
   users: {
     list: '/users',
     details: (id) => `/users/${id}`,
     permissions: (id) => `/users/${id}/permissions`,
     myPermissions: '/users/me/permissions',
-    myHospitals: '/users/me/hospitals',
-  },
-  fabricCategories: {
-    list: '/fabric-categories',
-    details: (id) => `/fabric-categories/${id}`,
-  },
-  fabricLots: {
-    list: '/fabric-lots',
-  },
-  fabricItems: {
-    list: '/fabric-items',
-    bulk: '/fabric-items/bulk',
-    details: (epc) => `/fabric-items/${epc}`,
-    hold: (id) => `/fabric-items/${id}/hold`,
-    decommission: (id) => `/fabric-items/${id}/decommission`,
-  },
-  devices: {
-    list: '/devices',
-    rotateToken: (id) => `/devices/${id}/rotate-token`,
-  },
-  rfidReader: {
-    scan: '/rfid-reader/scan',
-  },
-  restockReport: {
-    get: '/restock-report',
-    fillHistory: '/restock-report/fill-history',
-  },
-  restockCartPlan: {
-    get: '/restock-cart-plan',
-  },
-  washReceiveReport: {
-    get: '/wash-receive-report',
-  },
-  departments: {
-    list: '/departments',
-    details: (id) => `/departments/${id}`,
-  },
-  cabinets: {
-    list: '/cabinets',
-    details: (id) => `/cabinets/${id}`,
-    parLevels: (id) => `/cabinets/${id}/par-levels`,
   },
   auditLogs: {
     list: '/audit-logs',
-  },
-  statusTimeouts: {
-    list: '/status-timeout-settings',
-  },
-  alerts: {
-    list: '/alerts',
-  },
-  washAnalytics: {
-    list: '/wash-analytics',
-  },
-  globalSettings: {
-    list: '/global-settings',
   },
   loginPopupImages: {
     list: '/login-popup-images',
     forMe: '/login-popup-images/for-me',
     details: (id) => `/login-popup-images/${id}`,
-  },
-  transfers: {
-    list: '/transfers',
-  },
-  sync: {
-    conflicts: '/sync/conflicts',
-    approve: (id) => `/sync/conflicts/${id}/approve`,
-  },
-  decommissionRequests: {
-    list: '/decommission-requests',
-    approve: (id) => `/decommission-requests/${id}/approve`,
-    reject: (id) => `/decommission-requests/${id}/reject`,
-  },
-  scanSessions: {
-    list: '/scan-sessions',
-    details: (id) => `/scan-sessions/${id}`,
-    report: (id) => `/scan-sessions/${id}/report`,
-    confirm: (id) => `/scan-sessions/${id}/confirm`,
-    cancel: (id) => `/scan-sessions/${id}/cancel`,
-  },
-  scans: {
-    wardIssue: '/scans/ward-issue',
-    wardReceive: '/scans/ward-receive',
-    washReceiveBatch: '/scans/wash-receive-batch',
-    stockScan: '/scans/stock-scan',
-    stockScanRounds: '/scans/stock-scan-rounds',
-    statusChange: '/scans/status-change',
-  },
-  tracking: {
-    location: (epc) => `/tracking/location/${epc}`,
-    processStatus: '/tracking/process-status',
-  },
-  mail: {
-    list: '/api/mail/list',
-    details: '/api/mail/details',
-    labels: '/api/mail/labels',
-  },
-  post: {
-    list: '/api/post/list',
-    details: '/api/post/details',
-    latest: '/api/post/latest',
-    search: '/api/post/search',
-  },
-  product: {
-    list: '/api/product/list',
-    details: '/api/product/details',
-    search: '/api/product/search',
   },
 };
 
@@ -161,7 +52,7 @@ axiosInstance.interceptors.response.use(
       originalRequest?.url === endpoints.auth.signIn || originalRequest?.url === endpoints.auth.refresh;
 
     // PERM_STALE = สิทธิ์ถูกแก้ (server/src/middleware/authenticate.js) -> หลัง refresh ต้องดึง
-    // permission set + รายชื่อโรงพยาบาลใหม่ เพื่อให้เมนู/ปุ่มอัปเดตตามทันที
+    // permission set ใหม่ เพื่อให้เมนู/ปุ่มอัปเดตตามทันที
     const isPermStale = error.response?.data?.error === 'PERM_STALE';
 
     // 401 นอก auth flow เอง -> ลอง refresh token แล้ว retry request เดิมอัตโนมัติ (seamless refresh)
@@ -196,7 +87,6 @@ axiosInstance.interceptors.response.use(
           // เข้า bundle ระดับ module; interceptor นี้รันเฉพาะฝั่ง browser อยู่แล้ว
           import('swr').then(({ mutate }) => {
             mutate(endpoints.users.myPermissions);
-            mutate(endpoints.users.myHospitals);
           });
         }
 

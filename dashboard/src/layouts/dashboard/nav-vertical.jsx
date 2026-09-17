@@ -1,5 +1,4 @@
 import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
 import { useTheme } from '@mui/material/styles';
 
 import { varAlpha, hideScrollY } from 'src/theme/styles';
@@ -8,40 +7,23 @@ import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
 import { NavSectionMini, NavSectionVertical } from 'src/components/nav-section';
 
-import { splitNavDataByHqSection } from './split-nav-data';
 import { NavToggleButton } from '../components/nav-toggle-button';
-import { HospitalWorkspaceSwitcher } from '../components/hospital-workspace-switcher';
 
 // ----------------------------------------------------------------------
 
 export function NavVertical({ sx, data, slots, isNavMini, layoutQuery, onToggleNav, ...other }) {
   const theme = useTheme();
 
-  // เมนู "ศูนย์บริหารเครือข่าย" ไม่ผูกกับโรงพยาบาลที่เลือก (superadmin มองข้าม tenant ได้) จึงแยก
-  // ไปแสดงเหนือตัวเลือกโรงพยาบาล ส่วนเมนูที่เหลือทั้งหมด (ผูกกับโรงพยาบาลที่เลือกอยู่) อยู่ใต้ตัวเลือก
-  const { hqData, restData } = splitNavDataByHqSection(data);
-
   const renderNavVertical = (
     <>
       {slots?.topArea ?? (
-        <>
-          <Box sx={{ pl: 3.5, pr: 2, pt: 2.5, pb: hqData.length > 0 ? 1.5 : 2 }}>
-            <Logo width={160} height={50} sx={{ width: 160, height: 50, mb: 2 }} />
-            {hqData.length > 0 && (
-              <>
-                <NavSectionVertical data={hqData} {...other} />
-                <Divider sx={{ my: 1.5, borderStyle: 'dashed' }} />
-              </>
-            )}
-          </Box>
-          <Box sx={{ px: 2, pb: 2 }}>
-            <HospitalWorkspaceSwitcher />
-          </Box>
-        </>
+        <Box sx={{ pl: 3.5, pr: 2, pt: 2.5, pb: 2 }}>
+          <Logo width={160} height={50} sx={{ width: 160, height: 50 }} />
+        </Box>
       )}
 
       <Scrollbar fillContent>
-        <NavSectionVertical data={restData} sx={{ px: 2, flex: '1 1 auto' }} {...other} />
+        <NavSectionVertical data={data} sx={{ px: 2, flex: '1 1 auto' }} {...other} />
 
         {slots?.bottomArea}
       </Scrollbar>

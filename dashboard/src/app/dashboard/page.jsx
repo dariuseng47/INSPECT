@@ -1,11 +1,9 @@
-import { CONFIG } from 'src/config-global';
+import { redirect } from 'next/navigation';
 
-import { LmsOverviewView } from 'src/sections/overview/lms';
+import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
 
-export const metadata = { title: `Operational Overview - ${CONFIG.appName}` };
-
 export default function Page() {
-  return <LmsOverviewView />;
+  redirect(paths.dashboard.security.users);
 }

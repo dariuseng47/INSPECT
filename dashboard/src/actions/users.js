@@ -11,9 +11,8 @@ const swrOptions = {
   revalidateOnReconnect: false,
 };
 
-export function useGetUsers({ hospitalId, role } = {}) {
+export function useGetUsers({ role } = {}) {
   const params = new URLSearchParams();
-  if (hospitalId) params.set('hospitalId', hospitalId);
   if (role) params.set('role', role);
   const query = params.toString();
   const url = query ? `${endpoints.users.list}?${query}` : endpoints.users.list;
@@ -32,25 +31,6 @@ export function useGetUsers({ hospitalId, role } = {}) {
   );
 
   return memoizedValue;
-}
-
-// โรงพยาบาลที่ "ผู้ใช้ที่ล็อกอินอยู่" เข้าถึงได้ + ธง canEdit (ทุก role รวม superadmin)
-export function useGetMyHospitals(enabled = true) {
-  const { data, isLoading, error, mutate } = useSWR(
-    enabled ? endpoints.users.myHospitals : null,
-    fetcher,
-    swrOptions
-  );
-
-  return useMemo(
-    () => ({
-      myHospitals: data?.hospitals || [],
-      myHospitalsLoading: isLoading,
-      myHospitalsError: error,
-      refreshMyHospitals: mutate,
-    }),
-    [data?.hospitals, error, isLoading, mutate]
-  );
 }
 
 export async function createUser(payload) {
