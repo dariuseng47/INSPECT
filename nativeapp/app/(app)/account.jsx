@@ -18,7 +18,7 @@ const roleLabel = {
 
 export default function AccountScreen() {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, signOut, can } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -55,6 +55,21 @@ export default function AccountScreen() {
       <AppCard style={styles.infoCard}>
         <InfoRow icon="phone-outline" label="เบอร์โทร" value={user?.phone || '—'} />
       </AppCard>
+
+      {can('handheld.phone.scan.view') && (
+        <Pressable onPress={() => router.push('/phone-scan')}>
+          <AppCard style={styles.navCard}>
+            <View style={styles.navIcon}>
+              <MaterialCommunityIcons name="cellphone-check" size={24} color={brand.primary.dark} />
+            </View>
+            <View style={styles.navText}>
+              <Text style={[type.body1, styles.name]}>ตรวจสอบรุ่นโทรศัพท์</Text>
+              <Text style={[type.caption, styles.meta]}>ถ่ายภาพเพื่อตรวจสอบรุ่นและความจุ</Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={22} color={brand.grey[400]} />
+          </AppCard>
+        </Pressable>
+      )}
 
       <AppButton
         variant="outlined"
@@ -128,6 +143,23 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   infoText: {
+    gap: 2,
+  },
+  navCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  navIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: sage.tint,
+  },
+  navText: {
+    flex: 1,
     gap: 2,
   },
   signOutButton: {

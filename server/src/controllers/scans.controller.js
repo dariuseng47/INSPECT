@@ -74,10 +74,11 @@ export const createScan = asyncHandler(async (req, res) => {
   const annotatedBuffer = await drawAnnotations(originalBuffer, annotatedDetections);
   const annotatedUrl = await savePhoneScanFile(annotatedBuffer, '.png');
 
+  const source = req.headers['x-client-type'] === 'mobile' ? 'app' : 'web';
   const [batchResult] = await pool.query(
     `INSERT INTO scan_batches (user_id, source, original_image_path, annotated_image_path, device_count)
-     VALUES (?, 'web', ?, ?, ?)`,
-    [req.auth.userId, originalUrl, annotatedUrl, items.length]
+     VALUES (?, ?, ?, ?, ?)`,
+    [req.auth.userId, source, originalUrl, annotatedUrl, items.length]
   );
   const batchId = batchResult.insertId;
 

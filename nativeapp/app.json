@@ -28,6 +28,13 @@
       "expo-secure-store",
       "expo-font",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "แอปนี้ใช้คลังภาพเพื่อเลือกภาพโทรศัพท์สำหรับตรวจสอบรุ่น",
+          "cameraPermission": "แอปนี้ใช้กล้องเพื่อถ่ายภาพโทรศัพท์สำหรับตรวจสอบรุ่น"
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/logo/welgroup-logo.jpg",

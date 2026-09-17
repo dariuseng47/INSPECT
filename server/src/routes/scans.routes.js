@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { authenticate, requirePermission } from '../middleware/authenticate.js';
+import { authenticate, requireAnyPermission } from '../middleware/authenticate.js';
 import { validateRequest } from '../middleware/validateRequest.js';
 import { uploadPhoneScanImage } from '../middleware/upload.js';
 import * as scansController from '../controllers/scans.controller.js';
@@ -10,16 +10,23 @@ const router = Router();
 
 router.use(authenticate);
 
+// เว็บ (web.phone.history.view) กับมือถือ (handheld.phone.scan.*) เป็นสิทธิ์คนละชุดที่แอดมิน
+// เปิด/ปิดแยกกันได้ — endpoint เดียวกันนี้ถูกเรียกจากทั้งสองช่องทาง จึงยอมผ่านถ้ามีสิทธิ์ฝั่งใดฝั่งหนึ่ง
 router.get(
   '/',
-  requirePermission('web.phone.history.view'),
+  requireAnyPermission('web.phone.history.view', 'handheld.phone.scan.view'),
   validateRequest(listScanBatchesSchema),
   scansController.listScanBatches
 );
-router.post('/', requirePermission('web.phone.scan.edit'), uploadPhoneScanImage, scansController.createScan);
+router.post(
+  '/',
+  requireAnyPermission('web.phone.scan.edit', 'handheld.phone.scan.edit'),
+  uploadPhoneScanImage,
+  scansController.createScan
+);
 router.get(
   '/:id',
-  requirePermission('web.phone.history.view'),
+  requireAnyPermission('web.phone.history.view', 'handheld.phone.scan.view'),
   validateRequest(scanBatchParamsSchema),
   scansController.getScanBatch
 );

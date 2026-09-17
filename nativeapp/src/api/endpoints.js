@@ -12,4 +12,8 @@ export const endpoints = {
   users: {
     myPermissions: '/users/me/permissions',
   },
+  scans: {
+    list: '/scans',
+    details: (id) => `/scans/${id}`,
+  },
 };

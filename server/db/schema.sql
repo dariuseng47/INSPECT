@@ -190,7 +190,9 @@ INSERT INTO permissions (perm_key, category, description) VALUES
   ('web.phone.models.edit',        'web:phone',    'แก้ไข: เพิ่ม/แก้ไข/ลบรุ่นและภาพอ้างอิง'),
   ('web.phone.queue.view',         'web:phone',    'ดู: คิวตรวจสอบ'),
   ('web.phone.queue.edit',         'web:phone',    'แก้ไข: ยืนยัน/ปฏิเสธ/มอบหมายรุ่นในคิวตรวจสอบ'),
-  ('web.phone.history.view',       'web:phone',    'ดู: ประวัติการสแกน')
+  ('web.phone.history.view',       'web:phone',    'ดู: ประวัติการสแกน'),
+  ('handheld.phone.scan.view',     'handheld:phone', 'ดู: ตรวจสอบรุ่นโทรศัพท์ (มือถือ)'),
+  ('handheld.phone.scan.edit',     'handheld:phone', 'แก้ไข: อัพโหลดภาพตรวจสอบ (มือถือ)')
 ON DUPLICATE KEY UPDATE category = VALUES(category), description = VALUES(description);
 
 INSERT INTO role_default_permissions (role, perm_key) VALUES
@@ -204,7 +206,11 @@ INSERT INTO role_default_permissions (role, perm_key) VALUES
   ('ADMIN', 'web.phone.queue.view'),
   ('ADMIN', 'web.phone.queue.edit'),
   ('ADMIN', 'web.phone.history.view'),
+  ('ADMIN', 'handheld.phone.scan.view'),
+  ('ADMIN', 'handheld.phone.scan.edit'),
   ('OPERATOR', 'web.phone.scan.view'),
   ('OPERATOR', 'web.phone.scan.edit'),
-  ('OPERATOR', 'web.phone.history.view')
+  ('OPERATOR', 'web.phone.history.view'),
+  ('OPERATOR', 'handheld.phone.scan.view'),
+  ('OPERATOR', 'handheld.phone.scan.edit')
 ON DUPLICATE KEY UPDATE role = VALUES(role);

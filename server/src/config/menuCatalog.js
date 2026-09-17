@@ -12,7 +12,7 @@
 /**
  * @typedef {Object} MenuModule
  * @property {string} base        prefix ของ perm_key เช่น 'web.security.users'
- * @property {'web'} channel
+ * @property {'web'|'handheld'} channel
  * @property {string} category    กลุ่มสำหรับจัดหน้าจอตั้งค่า
  * @property {string} label       ชื่อเมนูภาษาไทย (ตรงกับ nav จริง)
  * @property {Array<'view'|'edit'>} actions
@@ -72,6 +72,16 @@ export const MENU_MODULES = [
     label: 'ประวัติการสแกน',
     actions: VIEW,
     roleDefaults: { ADMIN: VIEW, OPERATOR: VIEW },
+  },
+  // เครื่องสแกนหลักตาม spec คือแอปมือถือ — แยกสิทธิ์จาก web.phone.scan เพื่อให้เปิด/ปิดการสแกน
+  // จากมือถือ ได้อิสระจากสิทธิ์หน้าเว็บ (เหมือนโมเดล handheld.* เดิมของระบบก่อนรื้อ)
+  {
+    base: 'handheld.phone.scan',
+    channel: 'handheld',
+    category: 'phone',
+    label: 'ตรวจสอบรุ่นโทรศัพท์ (มือถือ)',
+    actions: VIEW_EDIT,
+    roleDefaults: { ADMIN: VIEW_EDIT, OPERATOR: VIEW_EDIT },
   },
 ];
 

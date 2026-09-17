@@ -7,6 +7,16 @@ import { clearTokens, getRefreshToken, setTokens, setSessionExpiresAt } from './
 // build-time inlined env var convention (equivalent to Next's NEXT_PUBLIC_*).
 const baseURL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
+// server เสิร์ฟไฟล์อัพโหลด (เช่น /uploads/phone-scans/xxx.png) ที่ root ไม่ใช่ใต้ /api/v1 —
+// ตัด /api/v1 ต่อท้าย baseURL ออกเพื่อได้ origin เปล่าๆ ไว้ประกอบ URL รูปแบบเต็มให้ <Image>
+export const serverOrigin = baseURL.replace(/\/api\/v1\/?$/, '');
+
+export function resolveUploadUrl(path) {
+  if (!path) return null;
+  if (/^https?:\/\//.test(path)) return path;
+  return `${serverOrigin}${path}`;
+}
+
 export const apiClient = axios.create({ baseURL });
 // Lets the server distinguish requests that originate from this mobile app. Not a security
 // boundary — just a workflow hint the server trusts, same trust level as the rest of this
