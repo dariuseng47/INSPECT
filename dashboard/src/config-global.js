@@ -28,7 +28,7 @@ function resolveServerUrl() {
 }
 
 export const CONFIG = {
-  appName: 'Minimal UI',
+  appName: 'Inspect',
   appVersion: packageJson.version,
   serverUrl: resolveServerUrl(),
   assetsDir: process.env.NEXT_PUBLIC_ASSETS_DIR ?? '',

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "WelGroup LMS",
-    "slug": "welgroup-lms",
-    "scheme": "welgroup-lms",
+    "name": "Inspect",
+    "slug": "inspect",
+    "scheme": "inspect",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,7 +18,7 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.anonymous.welgrouplms"
+      "package": "com.anonymous.inspect"
     },
     "web": {
       "favicon": "./assets/favicon.png"

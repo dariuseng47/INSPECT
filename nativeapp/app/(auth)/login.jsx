@@ -254,7 +254,7 @@ export default function LoginScreen() {
             </AppCard>
 
             <Text style={[type.caption, styles.footer]}>
-              WelGroup LMS
+              Inspect
             </Text>
           </ScrollView>
         </KeyboardAvoidingView>

@@ -1,7 +1,7 @@
 {
-  "name": "lms-server",
+  "name": "inspect-server",
   "version": "0.1.0",
-  "description": "Multi-Tenant IoT RFID Laundry Management System - Backend API (Express, Pure JS ES Modules)",
+  "description": "Auth/Security/User-Management + Phone Model Recognition - Backend API (Express, Pure JS ES Modules)",
   "private": true,
   "type": "module",
   "engines": {

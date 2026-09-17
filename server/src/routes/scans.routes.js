@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import { authenticate, requireAnyPermission } from '../middleware/authenticate.js';
 import { validateRequest } from '../middleware/validateRequest.js';
+import { scanRateLimiter } from '../middleware/security.js';
 import { uploadPhoneScanImage } from '../middleware/upload.js';
 import * as scansController from '../controllers/scans.controller.js';
 import { listScanBatchesSchema, scanBatchParamsSchema } from '../schemas/scan.schema.js';
@@ -21,6 +22,7 @@ router.get(
 router.post(
   '/',
   requireAnyPermission('web.phone.scan.edit', 'handheld.phone.scan.edit'),
+  scanRateLimiter,
   uploadPhoneScanImage,
   scansController.createScan
 );

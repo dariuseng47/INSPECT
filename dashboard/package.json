@@ -1,8 +1,7 @@
 {
-  "name": "@minimal-kit/next-js",
-  "author": "Minimals",
-  "version": "6.1.0",
-  "description": "Next & JavaScript",
+  "name": "inspect-dashboard",
+  "version": "1.0.0",
+  "description": "Inspect — Auth/Security/User-Management + Phone Model Recognition dashboard",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3033",

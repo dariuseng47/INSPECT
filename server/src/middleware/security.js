@@ -57,3 +57,16 @@ export const refreshRateLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'TOO_MANY_REQUESTS', message: 'พยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่ภายหลัง' },
 });
+
+// POST /scans เรียก ML-Service (detect + embed×N + match×N ต่อภาพ) บนเครื่อง CPU 2 core เครื่องเดียว —
+// จำกัดเป็นรายคน (ไม่ใช่ราย IP เหมือนตัวอื่น เพราะออฟฟิศเดียวกันอาจ NAT IP เดียวกันหลายคนใช้งานจริงพร้อมกัน)
+// กัน client ที่ bug/สคริปต์ยิงรัว ๆ จนแย่ง CPU จนคนอื่นสแกนไม่ได้ 40 ภาพ/15 นาทีเผื่อเหลือเผื่อขาดสำหรับ
+// การอัพโหลดแบบ bulk ของการใช้งานจริงไปแล้ว
+export const scanRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `user:${req.auth?.userId ?? req.ip}`,
+  message: { error: 'TOO_MANY_REQUESTS', message: 'สแกนบ่อยเกินไปในช่วงเวลานี้ กรุณาลองใหม่ภายหลัง' },
+});
