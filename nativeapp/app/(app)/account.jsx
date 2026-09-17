@@ -7,7 +7,6 @@ import { useAuth } from '../../src/auth/AuthContext';
 import { AppButton } from '../../src/components/AppButton';
 import { AppCard } from '../../src/components/AppCard';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
-import { useHospitalWorkspace } from '../../src/hospital/HospitalWorkspaceContext';
 import { brand, sage } from '../../src/theme/colors';
 import { type } from '../../src/theme/typography';
 
@@ -20,7 +19,6 @@ const roleLabel = {
 export default function AccountScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { isSuperadmin, activeHospital } = useHospitalWorkspace();
   const [signingOut, setSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -55,32 +53,8 @@ export default function AccountScreen() {
       </AppCard>
 
       <AppCard style={styles.infoCard}>
-        <InfoRow icon="hospital-building" label="โรงพยาบาล" value={user?.hospital_name || '—'} />
         <InfoRow icon="phone-outline" label="เบอร์โทร" value={user?.phone || '—'} />
       </AppCard>
-
-      {isSuperadmin ? (
-        <Pressable onPress={() => router.push('/select-hospital')}>
-          <AppCard style={styles.settingsRow}>
-            <MaterialCommunityIcons name="hospital-building" size={20} color={brand.grey[500]} />
-            <View style={styles.settingsRowText}>
-              <Text style={[type.body1, { color: brand.grey[800] }]}>เลือกโรงพยาบาล</Text>
-              <Text style={[type.caption, styles.meta]} numberOfLines={1}>
-                {activeHospital?.name || 'ยังไม่ได้เลือก'}
-              </Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={20} color={brand.grey[400]} />
-          </AppCard>
-        </Pressable>
-      ) : null}
-
-      <Pressable onPress={() => router.push('/settings')}>
-        <AppCard style={styles.settingsRow}>
-          <MaterialCommunityIcons name="cellphone-cog" size={20} color={brand.grey[500]} />
-          <Text style={[type.body1, styles.settingsRowLabel]}>ตั้งค่าเครื่อง (RFID Reader)</Text>
-          <MaterialCommunityIcons name="chevron-right" size={20} color={brand.grey[400]} />
-        </AppCard>
-      </Pressable>
 
       <AppButton
         variant="outlined"
@@ -152,19 +126,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-  },
-  settingsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  settingsRowText: {
-    flex: 1,
-    gap: 2,
-  },
-  settingsRowLabel: {
-    flex: 1,
-    color: brand.grey[800],
   },
   infoText: {
     gap: 2,

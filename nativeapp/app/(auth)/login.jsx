@@ -254,7 +254,7 @@ export default function LoginScreen() {
             </AppCard>
 
             <Text style={[type.caption, styles.footer]}>
-              Multi-Tenant IoT RFID Laundry Management System
+              WelGroup LMS
             </Text>
           </ScrollView>
         </KeyboardAvoidingView>

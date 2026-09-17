@@ -23,11 +23,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-    // Extra clearance for the floating tab bar AND the "พร้อมสแกน" badge that floats
-    // above it (app/(app)/_layout.jsx, ScanReadyContext) — both are absolutely
-    // positioned, so screen content doesn't get that space reserved automatically and
-    // the last item(s) would otherwise sit behind them when scrolled to the bottom.
-    paddingBottom: 190,
     gap: 18,
   },
 });

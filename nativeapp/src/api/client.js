@@ -8,10 +8,9 @@ import { clearTokens, getRefreshToken, setTokens, setSessionExpiresAt } from './
 const baseURL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
 export const apiClient = axios.create({ baseURL });
-// Server uses this to gate certain actions behind approval when they originate from the
-// mobile app — e.g. decommission requests need admin sign-off on the dashboard first
-// (server/src/controllers/fabricItems.controller.js). Not a security boundary — just a
-// workflow hint the server trusts, same trust level as the rest of this client's JWT-only auth.
+// Lets the server distinguish requests that originate from this mobile app. Not a security
+// boundary — just a workflow hint the server trusts, same trust level as the rest of this
+// client's JWT-only auth.
 apiClient.defaults.headers.common['X-Client-Type'] = 'mobile';
 
 export function setAuthHeader(accessToken) {
@@ -21,23 +20,6 @@ export function setAuthHeader(accessToken) {
 export function clearAuthHeader() {
   delete apiClient.defaults.headers.common.Authorization;
 }
-
-// superadmin ไม่มี tenant ของตัวเองใน JWT — ต้องบอก server ทุกครั้งว่ากำลังจัดการโรงพยาบาลไหน
-// โดยแนบ ?hospitalId= ไปกับทุก request (แพทเทิร์นเดียวกับ dashboard/src/hooks/use-effective-hospital.js)
-// ค่าที่ผู้ใช้เลือกไว้ถูกจำผ่าน SecureStore และ set กลับเข้ามาที่นี่ตอนบูตแอป —
-// ดู src/hospital/HospitalWorkspaceContext.jsx
-let hospitalScopeId = null;
-export function setHospitalScope(hospitalId) {
-  hospitalScopeId = hospitalId || null;
-}
-
-apiClient.interceptors.request.use((config) => {
-  // ไม่ทับค่า hospitalId ที่ผู้เรียกส่งมาเองอยู่แล้ว (เช่น flow ที่ผูก tenant จาก deviceId)
-  if (hospitalScopeId != null && config.params?.hospitalId == null) {
-    config.params = { ...config.params, hospitalId: hospitalScopeId };
-  }
-  return config;
-});
 
 // AuthContext registers this so the interceptor can hand control back to it
 // (clear session state, route to login) when a refresh ultimately fails —

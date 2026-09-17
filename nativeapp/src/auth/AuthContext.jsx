@@ -122,7 +122,7 @@ export function AuthProvider({ children }) {
     setStatus('signedOut');
   };
 
-  // can('handheld.ward.view') -> true/false ; superadmin หรือยังโหลดสิทธิ์ไม่เสร็จ = true
+  // can('web.security.users.view') -> true/false ; superadmin หรือยังโหลดสิทธิ์ไม่เสร็จ = true
   const can = useMemo(() => {
     const isSuperadmin = user?.role === 'SUPERADMIN';
     const granted = new Set((permissions || []).filter((p) => p.effective).map((p) => p.key));

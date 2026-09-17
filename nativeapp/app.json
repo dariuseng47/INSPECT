@@ -28,13 +28,6 @@
       "expo-secure-store",
       "expo-font",
       [
-        "expo-image-picker",
-        {
-          "photosPermission": "แอปต้องเข้าถึงคลังรูปภาพเพื่อแนบรูปตอนแจ้งพัก/ชำรุดผ้า",
-          "cameraPermission": "แอปต้องเข้าถึงกล้องเพื่อถ่ายรูปตอนแจ้งพัก/ชำรุดผ้า"
-        }
-      ],
-      [
         "expo-splash-screen",
         {
           "image": "./assets/logo/welgroup-logo.jpg",

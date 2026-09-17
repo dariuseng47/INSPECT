@@ -15,7 +15,7 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={status === 'signedIn' ? '/home' : '/login'} />;
+  return <Redirect href={status === 'signedIn' ? '/account' : '/login'} />;
 }
 
 const styles = StyleSheet.create({
