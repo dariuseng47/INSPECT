@@ -12,6 +12,37 @@ const icon = (name) => <Iconify icon={name} width={22} />;
 function buildItems() {
   return [
     {
+      title: 'ตรวจสอบรุ่นโทรศัพท์',
+      path: paths.dashboard.phone.scan,
+      icon: icon('solar:smartphone-2-bold-duotone'),
+      children: [
+        {
+          title: 'ตรวจสอบรุ่นโทรศัพท์',
+          path: paths.dashboard.phone.scan,
+          icon: icon('solar:camera-bold-duotone'),
+          perm: 'web.phone.scan.view',
+        },
+        {
+          title: 'ข้อมูลรุ่นโทรศัพท์',
+          path: paths.dashboard.phone.models,
+          icon: icon('solar:widget-bold-duotone'),
+          perm: 'web.phone.models.view',
+        },
+        {
+          title: 'คิวตรวจสอบ',
+          path: paths.dashboard.phone.queue,
+          icon: icon('solar:question-circle-bold-duotone'),
+          perm: 'web.phone.queue.view',
+        },
+        {
+          title: 'ประวัติการสแกน',
+          path: paths.dashboard.phone.history,
+          icon: icon('solar:history-bold-duotone'),
+          perm: 'web.phone.history.view',
+        },
+      ],
+    },
+    {
       title: 'ความปลอดภัย & ตั้งค่าระบบ',
       path: paths.dashboard.security.users,
       icon: icon('solar:shield-keyhole-bold-duotone'),

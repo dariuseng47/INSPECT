@@ -27,6 +27,29 @@ export const endpoints = {
     forMe: '/login-popup-images/for-me',
     details: (id) => `/login-popup-images/${id}`,
   },
+  phoneModels: {
+    list: '/phone-models',
+    details: (id) => `/phone-models/${id}`,
+    images: (id) => `/phone-models/${id}/images`,
+    deleteImage: (id, imageId) => `/phone-models/${id}/images/${imageId}`,
+    reindex: '/phone-models/reindex',
+  },
+  scans: {
+    list: '/scans',
+    details: (id) => `/scans/${id}`,
+  },
+  unidentifiedQueue: {
+    list: '/unidentified-queue',
+    extraImages: (id) => `/unidentified-queue/${id}/extra-images`,
+    resolve: (id) => `/unidentified-queue/${id}/resolve`,
+    reject: (id) => `/unidentified-queue/${id}/reject`,
+  },
+  reviewLogs: {
+    list: '/review-logs',
+  },
+  mlHealth: {
+    get: '/ml-health',
+  },
 };
 
 // withCredentials: true — จำเป็นสำหรับส่ง HttpOnly refresh_token cookie ไปกับ /auth/refresh

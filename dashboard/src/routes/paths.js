@@ -27,5 +27,12 @@ export const paths = {
     settings: {
       superadmin: `${ROOTS.DASHBOARD}/settings/superadmin`,
     },
+    phone: {
+      scan: `${ROOTS.DASHBOARD}/phone/scan`,
+      models: `${ROOTS.DASHBOARD}/phone/models`,
+      modelDetails: (id) => `${ROOTS.DASHBOARD}/phone/models/${id}`,
+      queue: `${ROOTS.DASHBOARD}/phone/queue`,
+      history: `${ROOTS.DASHBOARD}/phone/history`,
+    },
   },
 };

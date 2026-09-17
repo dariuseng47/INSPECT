@@ -31,6 +31,7 @@ import { StyledDivider, useNavColorVars } from './styles';
 import { SignOutButton } from '../components/sign-out-button';
 import { SettingsButton } from '../components/settings-button';
 import { LanguagePopover } from '../components/language-popover';
+import { MlHealthIndicator } from '../components/ml-health/ml-health-indicator';
 
 // ----------------------------------------------------------------------
 
@@ -152,6 +153,8 @@ export function DashboardLayout({ sx, children, header, data }) {
                       สวัสดี, {user.full_name}
                     </Typography>
                   )}
+                  {/* -- ML-Service health -- */}
+                  <MlHealthIndicator />
                   {/* -- Searchbar -- */}
                   <Searchbar data={navData} />
                   {/* -- Language popover -- */}
