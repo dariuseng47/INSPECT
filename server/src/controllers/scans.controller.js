@@ -1,6 +1,7 @@
 import { pool } from '../db/pool.js';
 import { AppError } from '../utils/AppError.js';
 import { logAudit } from '../utils/auditLog.js';
+import { hasPermission } from '../utils/permissions.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { mlDetect, mlEmbed, mlMatch } from '../utils/mlClient.js';
 import { savePhoneScanFile } from '../middleware/upload.js';
@@ -186,12 +187,21 @@ async function buildBatchResponse(batchId) {
  */
 export const listScanBatches = asyncHandler(async (req, res) => {
   const limit = req.query.limit ?? 50;
+
+  // เฉพาะคนมีสิทธิ์ web.phone.history.view (แอดมิน/โอเปอเรเตอร์ฝั่งเว็บ) เห็นประวัติทุกคนได้ —
+  // ที่เหลือ (โอเปอเรเตอร์ผ่านมือถือด้วย handheld.phone.scan เท่านั้น) เห็นแค่รอบสแกนของตัวเอง
+  // ตาม spec "ประวัติการสแกนของผู้ใช้"
+  const canViewAllHistory = await hasPermission(req.auth.userId, req.auth.role, 'web.phone.history.view');
+  const where = canViewAllHistory ? '' : 'WHERE sb.user_id = ?';
+  const values = canViewAllHistory ? [limit] : [req.auth.userId, limit];
+
   const [rows] = await pool.query(
     `SELECT sb.*, u.full_name AS user_full_name
      FROM scan_batches sb
      LEFT JOIN users u ON u.id = sb.user_id
+     ${where}
      ORDER BY sb.created_at DESC LIMIT ?`,
-    [limit]
+    values
   );
   return res.json({ batches: rows });
 });
@@ -200,7 +210,13 @@ export const listScanBatches = asyncHandler(async (req, res) => {
  * GET /api/v1/scans/:id
  */
 export const getScanBatch = asyncHandler(async (req, res) => {
-  const [rows] = await pool.query('SELECT id FROM scan_batches WHERE id = ?', [req.params.id]);
+  const [rows] = await pool.query('SELECT id, user_id FROM scan_batches WHERE id = ?', [req.params.id]);
   if (!rows[0]) throw new AppError(404, 'NOT_FOUND', 'ไม่พบรอบสแกนนี้');
+
+  const canViewAllHistory = await hasPermission(req.auth.userId, req.auth.role, 'web.phone.history.view');
+  if (!canViewAllHistory && rows[0].user_id !== req.auth.userId) {
+    throw new AppError(404, 'NOT_FOUND', 'ไม่พบรอบสแกนนี้');
+  }
+
   return res.json(await buildBatchResponse(req.params.id));
 });
