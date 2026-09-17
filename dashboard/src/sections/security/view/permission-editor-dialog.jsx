@@ -240,7 +240,7 @@ export function PermissionEditorDialog({ open, onClose, targetUser, onSaved }) {
         ) : (
           <>
             <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 2 }}>
-              <Tab value="web" label="เมนูเว็บ" />
+              <Tab value="web" label="สิทธิ์การเข้าถึงเมนู" />
               {(!targetIsSuperadmin || (targetIsAdmin && isSuperadminActor)) && (
                 <Tab value="other" label="อื่นๆ" />
               )}
