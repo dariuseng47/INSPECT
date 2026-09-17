@@ -4,8 +4,8 @@
   "description": "Inspect — Auth/Security/User-Management + Phone Model Recognition dashboard",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3033",
-    "start": "next start -p ${PORT:-3033}",
+    "dev": "next dev -p 3039",
+    "start": "next start -p ${PORT:-3039}",
     "build": "next build",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint:fix": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
@@ -15,7 +15,7 @@
     "re:start": "yarn rm:all && yarn install && yarn dev",
     "re:build": "yarn rm:all && yarn install && yarn build",
     "re:build-npm": "npm run rm:all && npm install && npm run build",
-    "start:out": "npx serve@latest out -p 3033"
+    "start:out": "npx serve@latest out -p 3039"
   },
   "engines": {
     "node": ">=20.0.0"
