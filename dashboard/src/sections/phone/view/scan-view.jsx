@@ -207,7 +207,18 @@ function BatchResultCard({ data, index, total }) {
         </Typography>
       )}
       <Card sx={{ p: 2 }}>
-        <Box component="img" src={resolveUploadUrl(data.batch.annotated_image_path)} sx={{ width: '100%', borderRadius: 1.5 }} />
+        <Box
+          component="img"
+          src={resolveUploadUrl(data.batch.annotated_image_path)}
+          sx={{
+            width: '100%',
+            maxHeight: 560,
+            objectFit: 'contain',
+            borderRadius: 1.5,
+            bgcolor: 'background.neutral',
+            display: 'block',
+          }}
+        />
       </Card>
 
       <Card>

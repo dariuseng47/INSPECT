@@ -49,7 +49,18 @@ function BatchDetailDialog({ id, onClose }) {
           <LoadingScreen sx={{ height: 200 }} />
         ) : (
           <Stack spacing={2}>
-            <Box component="img" src={resolveUploadUrl(batch?.annotated_image_path)} sx={{ width: '100%', borderRadius: 1.5 }} />
+            <Box
+              component="img"
+              src={resolveUploadUrl(batch?.annotated_image_path)}
+              sx={{
+                width: '100%',
+                maxHeight: 480,
+                objectFit: 'contain',
+                borderRadius: 1.5,
+                bgcolor: 'background.neutral',
+                display: 'block',
+              }}
+            />
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
               {summary?.byCapacity.map((row) => (
                 <Chip key={row.capacityGb} size="small" variant="soft" color="primary" label={`${row.capacityGb} GB × ${row.count}`} />
