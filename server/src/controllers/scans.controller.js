@@ -125,14 +125,39 @@ async function buildBatchResponse(batchId) {
   const [batchRows] = await pool.query('SELECT * FROM scan_batches WHERE id = ?', [batchId]);
   const batch = batchRows[0];
 
-  const [itemRows] = await pool.query(
-    `SELECT si.*, pm.brand, pm.model_name, pm.min_capacity_gb
+  const [rawItemRows] = await pool.query(
+    `SELECT si.*, pm.brand, pm.model_name, pm.min_capacity_gb,
+            uq.id AS queue_id, uq.candidate_model_ids
      FROM scan_items si
      LEFT JOIN phone_models pm ON pm.id = si.matched_model_id
+     LEFT JOIN unidentified_queue uq ON uq.scan_item_id = si.id AND uq.status = 'pending'
      WHERE si.batch_id = ?
      ORDER BY si.id`,
     [batchId]
   );
+
+  // resolve ชื่อรุ่นของ candidate ให้ client แสดงได้ทันทีโดยไม่ต้องยิง /unidentified-queue ซ้ำ
+  const allCandidateIds = rawItemRows.flatMap((r) =>
+    (typeof r.candidate_model_ids === 'string' ? JSON.parse(r.candidate_model_ids) : r.candidate_model_ids ?? []).map(
+      (c) => c.modelId
+    )
+  );
+  const candidateModelMap = new Map();
+  if (allCandidateIds.length) {
+    const [candidateModels] = await pool.query(
+      'SELECT id, brand, model_name, min_capacity_gb FROM phone_models WHERE id IN (?)',
+      [[...new Set(allCandidateIds)]]
+    );
+    candidateModels.forEach((m) => candidateModelMap.set(m.id, m));
+  }
+
+  const itemRows = rawItemRows.map((row) => {
+    const rawCandidates = typeof row.candidate_model_ids === 'string' ? JSON.parse(row.candidate_model_ids) : row.candidate_model_ids ?? [];
+    return {
+      ...row,
+      candidate_model_ids: rawCandidates.map((c) => ({ ...c, model: candidateModelMap.get(c.modelId) ?? null })),
+    };
+  });
 
   const byCapacity = new Map();
   let uncertainCount = 0;

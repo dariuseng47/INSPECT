@@ -16,4 +16,12 @@ export const endpoints = {
     list: '/scans',
     details: (id) => `/scans/${id}`,
   },
+  phoneModels: {
+    list: '/phone-models',
+  },
+  unidentifiedQueue: {
+    extraImages: (id) => `/unidentified-queue/${id}/extra-images`,
+    resolve: (id) => `/unidentified-queue/${id}/resolve`,
+    reject: (id) => `/unidentified-queue/${id}/reject`,
+  },
 };

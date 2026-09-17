@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
@@ -15,7 +16,12 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
-import { useGetPhoneModel, uploadPhoneModelImages, deletePhoneModelImage } from 'src/actions/phoneModels';
+import {
+  useGetPhoneModel,
+  updatePhoneModel,
+  uploadPhoneModelImages,
+  deletePhoneModelImage,
+} from 'src/actions/phoneModels';
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
@@ -53,6 +59,16 @@ export function PhoneModelDetailsView({ id }) {
       refreshModel();
     } catch (error) {
       toast.error(error?.message || 'ลบไม่สำเร็จ');
+    }
+  };
+
+  const handleSetCover = async (imageId) => {
+    try {
+      await updatePhoneModel(id, { coverImageId: imageId });
+      toast.success('ตั้งเป็นภาพหลักแล้ว');
+      refreshModel();
+    } catch (error) {
+      toast.error(error?.message || 'ตั้งค่าไม่สำเร็จ');
     }
   };
 
@@ -115,51 +131,92 @@ export function PhoneModelDetailsView({ id }) {
           </Typography>
         ) : (
           <Grid container spacing={2}>
-            {images.map((image) => (
-              <Grid item key={image.id} xs={6} sm={4} md={3}>
-                <Box sx={{ position: 'relative', borderRadius: 1.5, overflow: 'hidden' }}>
-                  <Box
-                    component="img"
-                    src={image.image_path}
-                    sx={{ width: '100%', height: 140, objectFit: 'cover', display: 'block' }}
-                  />
-                  {!image.embedded_at && (
-                    <Tooltip title="ยังไม่ถูกประมวลผลเข้าฐานข้อมูล">
+            {images.map((image) => {
+              const isCover = model.cover_image_path === image.image_path;
+              return (
+                <Grid item key={image.id} xs={6} sm={4} md={3}>
+                  <Box sx={{ position: 'relative', borderRadius: 1.5, overflow: 'hidden' }}>
+                    <Box
+                      component="img"
+                      src={image.image_path}
+                      sx={{
+                        width: '100%',
+                        height: 140,
+                        objectFit: 'cover',
+                        display: 'block',
+                        ...(isCover && { outline: '3px solid', outlineColor: 'primary.main' }),
+                      }}
+                    />
+                    {isCover && (
                       <Box
                         sx={{
                           position: 'absolute',
-                          top: 6,
+                          bottom: 6,
                           left: 6,
                           px: 0.75,
                           py: 0.25,
                           borderRadius: 0.75,
-                          bgcolor: 'warning.main',
-                          color: 'warning.contrastText',
+                          bgcolor: 'primary.main',
+                          color: 'primary.contrastText',
                           typography: 'caption',
                           fontWeight: 700,
                         }}
                       >
-                        รอประมวลผล
+                        ภาพหลัก
                       </Box>
-                    </Tooltip>
-                  )}
-                  <IconButton
-                    size="small"
-                    onClick={() => handleDeleteImage(image.id)}
-                    sx={{
-                      position: 'absolute',
-                      top: 4,
-                      right: 4,
-                      bgcolor: 'rgba(0,0,0,0.5)',
-                      color: 'common.white',
-                      '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' },
-                    }}
-                  >
-                    <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                  </IconButton>
-                </Box>
-              </Grid>
-            ))}
+                    )}
+                    {!image.embedded_at && (
+                      <Tooltip title="ยังไม่ถูกประมวลผลเข้าฐานข้อมูล">
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            top: 6,
+                            left: 6,
+                            px: 0.75,
+                            py: 0.25,
+                            borderRadius: 0.75,
+                            bgcolor: 'warning.main',
+                            color: 'warning.contrastText',
+                            typography: 'caption',
+                            fontWeight: 700,
+                          }}
+                        >
+                          รอประมวลผล
+                        </Box>
+                      </Tooltip>
+                    )}
+                    <Stack direction="row" spacing={0.5} sx={{ position: 'absolute', top: 4, right: 4 }}>
+                      {!isCover && (
+                        <Tooltip title="ตั้งเป็นภาพหลัก">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleSetCover(image.id)}
+                            sx={{
+                              bgcolor: 'rgba(0,0,0,0.5)',
+                              color: 'common.white',
+                              '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' },
+                            }}
+                          >
+                            <Iconify icon="solar:star-bold" width={16} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteImage(image.id)}
+                        sx={{
+                          bgcolor: 'rgba(0,0,0,0.5)',
+                          color: 'common.white',
+                          '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' },
+                        }}
+                      >
+                        <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                      </IconButton>
+                    </Stack>
+                  </Box>
+                </Grid>
+              );
+            })}
           </Grid>
         )}
       </Card>

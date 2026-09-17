@@ -1,7 +1,24 @@
 import { pool } from '../db/pool.js';
 import { AppError } from '../utils/AppError.js';
 import { logAudit } from '../utils/auditLog.js';
+import { hasPermission } from '../utils/permissions.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+
+// route ยอมทั้ง web.phone.queue.edit (แอดมินจัดการได้ทุกรายการ) และ handheld.phone.scan.edit
+// (โอเปอเรเตอร์ผ่านมือถือ — เป็นคนสแกนตอนนั้นเอง เห็นเครื่องจริงตรงหน้า) แยกกันอิสระ — ฝั่ง handheld
+// จึงต้องเช็คเพิ่มว่าเป็นเจ้าของรอบสแกนนั้นจริง กันโอเปอเรเตอร์คนอื่นมาจัดการคิวที่ไม่ใช่ของตัวเอง
+async function assertCanActOnQueueItem(auth, scanItemId) {
+  const canManageAnyQueue = await hasPermission(auth.userId, auth.role, 'web.phone.queue.edit');
+  if (canManageAnyQueue) return;
+
+  const [rows] = await pool.query(
+    'SELECT sb.user_id FROM scan_items si JOIN scan_batches sb ON sb.id = si.batch_id WHERE si.id = ?',
+    [scanItemId]
+  );
+  if (rows[0]?.user_id !== auth.userId) {
+    throw new AppError(403, 'FORBIDDEN', 'จัดการได้เฉพาะรายการจากการสแกนของตัวเองเท่านั้น');
+  }
+}
 
 /**
  * GET /api/v1/unidentified-queue?status=pending
@@ -59,6 +76,7 @@ export const addExtraImages = asyncHandler(async (req, res) => {
   if (queueItem.status !== 'pending') {
     throw new AppError(400, 'VALIDATION_ERROR', 'รายการนี้ถูกจัดการไปแล้ว');
   }
+  await assertCanActOnQueueItem(req.auth, queueItem.scan_item_id);
 
   const existing = typeof queueItem.extra_images === 'string' ? JSON.parse(queueItem.extra_images) : queueItem.extra_images ?? [];
   const merged = [...existing, ...req.uploadedImageUrls];
@@ -83,6 +101,7 @@ export const resolveQueue = asyncHandler(async (req, res) => {
   if (queueItem.status !== 'pending') {
     throw new AppError(400, 'VALIDATION_ERROR', 'รายการนี้ถูกจัดการไปแล้ว');
   }
+  await assertCanActOnQueueItem(req.auth, queueItem.scan_item_id);
 
   const [itemRows] = await pool.query('SELECT * FROM scan_items WHERE id = ?', [queueItem.scan_item_id]);
   const scanItem = itemRows[0];
@@ -161,6 +180,7 @@ export const rejectQueue = asyncHandler(async (req, res) => {
   if (queueItem.status !== 'pending') {
     throw new AppError(400, 'VALIDATION_ERROR', 'รายการนี้ถูกจัดการไปแล้ว');
   }
+  await assertCanActOnQueueItem(req.auth, queueItem.scan_item_id);
 
   await pool.query(
     'UPDATE unidentified_queue SET status = ?, resolved_at = NOW(), resolved_by = ? WHERE id = ?',

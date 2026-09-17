@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { authenticate, requirePermission } from '../middleware/authenticate.js';
+import { authenticate, requirePermission, requireAnyPermission } from '../middleware/authenticate.js';
 import { validateRequest } from '../middleware/validateRequest.js';
 import { uploadPhoneModelImages } from '../middleware/upload.js';
 import * as phoneModelsController from '../controllers/phoneModels.controller.js';
@@ -15,7 +15,13 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get('/', requirePermission('web.phone.models.view'), phoneModelsController.listPhoneModels);
+// list ยอมทั้งแอดมิน (จัดการรุ่น) และโอเปอเรเตอร์ผ่านมือถือ (ต้องอ่านรายชื่อรุ่นเพื่อเลือกตอน
+// ยืนยันเครื่องที่ไม่แน่ใจ) — write ทุก endpoint ที่เหลือด้านล่างยังคง admin-only เหมือนเดิม
+router.get(
+  '/',
+  requireAnyPermission('web.phone.models.view', 'handheld.phone.scan.edit'),
+  phoneModelsController.listPhoneModels
+);
 
 router.post('/reindex', requirePermission('web.phone.models.edit'), phoneModelsController.reindexAll);
 
