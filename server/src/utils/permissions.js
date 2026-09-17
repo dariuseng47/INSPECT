@@ -1,5 +1,5 @@
 import { pool } from '../db/pool.js';
-import { MENU_PERMISSIONS, LEGACY_PERMISSION_REMAP } from '../config/menuCatalog.js';
+import { MENU_PERMISSIONS } from '../config/menuCatalog.js';
 
 // Permission catalogue — สร้างจาก server/src/config/menuCatalog.js (source of truth)
 // ต้องตรงกับที่ seed ไว้ใน db/migrations/028_rbac_scopes_menu_permissions.sql
@@ -20,12 +20,6 @@ const PERMISSION_KEYS = new Set(PERMISSION_CATALOG.map((p) => p.key));
 
 export function isKnownPermissionKey(permKey) {
   return PERMISSION_KEYS.has(permKey);
-}
-
-// endpoint ที่ web กับ handheld ยิงมาที่ path เดียวกัน (เช่น เปลี่ยนสถานะผ้า, พัก/ชำรุด) เช็คด้วย
-// คีย์เดิม (ก่อน 028) ผ่าน map นี้ -> แปลว่า "มีสิทธิ์ทำ action นี้จากช่องทางใดช่องทางหนึ่ง"
-export function permKeysForLegacy(legacyKey) {
-  return LEGACY_PERMISSION_REMAP[legacyKey] ?? [legacyKey];
 }
 
 // effective(user, perm_key) ตามสูตรใน docs/rbac-permissions.md:

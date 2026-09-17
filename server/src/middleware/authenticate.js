@@ -4,8 +4,7 @@ import { AppError } from '../utils/AppError.js';
 import { hasPermission } from '../utils/permissions.js';
 import { verifyAccessToken } from '../utils/tokens.js';
 
-// ตรวจ Bearer access token แล้วแนบ req.auth = { userId, role, hospitalId, permVersion, sessionStartedAt }
-// hospital_id มาจาก JWT claim เท่านั้น — ดู docs/multi-tenant-isolation.md ชั้นที่ 1
+// ตรวจ Bearer access token แล้วแนบ req.auth = { userId, role, permVersion, sessionStartedAt }
 export async function authenticate(req, res, next) {
   const header = req.headers.authorization;
 
@@ -39,7 +38,6 @@ export async function authenticate(req, res, next) {
     req.auth = {
       userId: payload.sub,
       role: payload.role,
-      hospitalId: payload.hospital_id ?? null,
       permVersion: payload.perm_version,
       sessionStartedAt: payload.session_started_at ?? null,
     };

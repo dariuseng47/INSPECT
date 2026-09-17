@@ -18,7 +18,6 @@ router.use(authenticate);
 
 // ต้องอยู่ก่อน '/' และ '/:id/*' — endpoint ส่วนตัวของผู้ใช้เอง ไม่ผูกกับสิทธิ์เมนู "ผู้ใช้งาน"
 router.get('/me/permissions', permissionsController.getMyPermissions);
-router.get('/me/hospitals', usersController.getMyHospitals);
 
 router.get(
   '/',

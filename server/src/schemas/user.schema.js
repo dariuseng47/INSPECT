@@ -1,16 +1,5 @@
 import { z } from 'zod';
 
-// [{ hospitalId, canEdit }] — โรงพยาบาลที่บัญชีนี้ดูแล (ADMIN/OPERATOR ได้หลายแห่ง)
-const hospitalScopesSchema = z
-  .array(
-    z.object({
-      hospitalId: z.coerce.number().int().positive(),
-      canEdit: z.boolean().optional(),
-    })
-  )
-  .max(200)
-  .optional();
-
 export const createUserSchema = z.object({
   body: z.object({
     username: z.string().min(3).max(100),
@@ -21,9 +10,6 @@ export const createUserSchema = z.object({
     fullName: z.string().min(1).max(150),
     phone: z.string().max(30).optional(),
     role: z.enum(['SUPERADMIN', 'ADMIN', 'OPERATOR']),
-    // รูปแบบเก่า (โรงพยาบาลเดียว) — ยังรองรับ; รูปแบบใหม่ใช้ hospitalScopes[]
-    hospitalId: z.coerce.number().int().positive().optional(),
-    hospitalScopes: hospitalScopesSchema,
     handheldEnabled: z.boolean().optional(),
     canManageSubordinates: z.boolean().optional(),
   }),
@@ -37,13 +23,11 @@ export const updateUserSchema = z.object({
     isActive: z.boolean().optional(),
     handheldEnabled: z.boolean().optional(),
     canManageSubordinates: z.boolean().optional(),
-    hospitalScopes: hospitalScopesSchema,
   }),
 });
 
 export const listUsersSchema = z.object({
   query: z.object({
-    hospitalId: z.coerce.number().int().positive().optional(),
     // CSV เช่น "ADMIN,OPERATOR" — ดู listUsers ใน users.controller.js สำหรับ parsing
     role: z.string().max(100).optional(),
   }),

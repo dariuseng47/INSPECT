@@ -27,7 +27,7 @@ export function createApp() {
   app.use(cookieParser());
   app.use(globalRateLimiter);
 
-  // เสิร์ฟไฟล์ที่อัปโหลด (เช่น รูปพัก/ชำรุด, รูป popup หลัง login) — ชื่อไฟล์เป็น UUID สุ่มเสมอ
+  // เสิร์ฟไฟล์ที่อัปโหลด (รูป popup หลัง login) — ชื่อไฟล์เป็น UUID สุ่มเสมอ
   // (ดู middleware/upload.js) จึงเดาชื่อไฟล์คนอื่นไม่ได้ ไม่ต้องผ่าน authenticate เพื่อให้ <img src>
   // ฝั่ง dashboard โหลดตรงได้เลย — express.static กัน path traversal (../) ให้อัตโนมัติอยู่แล้ว
   //

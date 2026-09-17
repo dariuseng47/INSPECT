@@ -6,7 +6,6 @@ import { hashPin } from '../utils/pin.js';
 import { AppError } from '../utils/AppError.js';
 import { logAudit } from '../utils/auditLog.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { listAccessibleHospitals, listAccessibleHospitalsFor } from '../utils/tenant.js';
 import {
   signAccessToken,
   signRefreshToken,
@@ -15,7 +14,7 @@ import {
 } from '../utils/tokens.js';
 
 // มือถือ (nativeapp ส่ง header x-client-type: mobile) จะ login ได้ต่อเมื่อ users.handheld_enabled = 1
-// superadmin ข้ามเช็คนี้เสมอ — ดู docs/rbac-permissions.md (handheld master switch)
+// superadmin ข้ามเช็คนี้เสมอ
 function assertHandheldAllowed(req, user) {
   const isMobile = req.headers['x-client-type'] === 'mobile';
   if (isMobile && user.role !== 'SUPERADMIN' && !user.handheld_enabled) {
@@ -46,7 +45,6 @@ async function issueTokenPair(user, sessionStartedAt = Math.floor(Date.now() / 1
   const accessToken = signAccessToken({
     userId: user.id,
     role: user.role,
-    hospitalId: user.hospital_id,
     // perm_version จริงจาก DB (เพิ่มขึ้นทุกครั้งที่ user_permission_overrides ของ user นี้ถูกแก้
     // — ดู server/src/utils/permissions.js incrementPermVersion) client เอาไว้เทียบกับค่า cache
     // เพื่อรู้ว่าต้อง refresh permission set ใหม่ กันใช้สิทธิ์เก่าค้างหลังโดนลดสิทธิ์กะทันหัน
@@ -77,19 +75,12 @@ function sanitizeUser(user) {
 
 /**
  * POST /api/v1/auth/login
- * หา user จาก username ระดับ global ก่อน (ยังไม่รู้ hospital_id ณ จุดนี้) จึง query ตรงผ่าน pool
- * ไม่ผ่าน scopedQuery เพราะขั้นตอนนี้คือการพิสูจน์ตัวตน ไม่ใช่การเข้าถึงข้อมูลระดับ tenant
  */
 export const login = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
-  // LEFT JOIN hospitals — เผื่อ superadmin ที่ user.hospital_id เป็น NULL
-  // เอาชื่อโรงพยาบาลติดมาด้วยเลยตั้งแต่ login เพื่อให้ sidebar switcher แสดงชื่อได้ทันที
-  // โดยไม่ต้องมี endpoint แยก (admin/operator เรียก GET /hospitals ไม่ได้ เป็น superadmin เท่านั้น)
   const [rows] = await pool.query(
-    `SELECT u.*, h.name AS hospital_name FROM users u
-     LEFT JOIN hospitals h ON h.id = u.hospital_id
-     WHERE u.username = ? AND u.deleted_at IS NULL LIMIT 1`,
+    'SELECT * FROM users WHERE username = ? AND deleted_at IS NULL LIMIT 1',
     [username]
   );
   const user = rows[0];
@@ -107,21 +98,13 @@ export const login = asyncHandler(async (req, res) => {
 
   const { accessToken, refreshToken, sessionStartedAt } = await issueTokenPair(user);
 
-  // ให้หน้า "ผู้ใช้งาน & สิทธิ์การเข้าถึง" โชว์ได้ว่าล่าสุดใคร login จากมือถือ (handheld) เมื่อไหร่
-  // — ออนไลน์/ออฟไลน์แบบ real-time แยกอีกที่ (server/src/sockets/presence.js, ไม่ได้เก็บ DB)
   const loginClient = req.headers['x-client-type'] === 'mobile' ? 'mobile' : 'web';
   await pool.query('UPDATE users SET last_login_at = NOW(), last_login_client = ? WHERE id = ?', [
     loginClient,
     user.id,
   ]);
 
-  await logAudit({
-    hospitalId: user.hospital_id,
-    userId: user.id,
-    action: 'LOGIN',
-    entityType: 'auth',
-    entityId: user.id,
-  });
+  await logAudit({ userId: user.id, action: 'LOGIN', entityType: 'auth', entityId: user.id });
 
   res.cookie(REFRESH_COOKIE_NAME, refreshToken, refreshCookieOptions());
 
@@ -129,11 +112,6 @@ export const login = asyncHandler(async (req, res) => {
     accessToken,
     refreshToken, // mobile client (Expo SecureStore) อ่านจากตรงนี้ ฝั่ง web ใช้ cookie แทน
     user: sanitizeUser(user),
-    hospitals: await listAccessibleHospitalsFor({
-      userId: user.id,
-      role: user.role,
-      hospitalId: user.hospital_id,
-    }),
     sessionExpiresAt: sessionExpiresAtOf(sessionStartedAt),
   });
 });
@@ -148,9 +126,7 @@ export const loginPin = asyncHandler(async (req, res) => {
   const pinHash = hashPin(pin);
 
   const [rows] = await pool.query(
-    `SELECT u.*, h.name AS hospital_name FROM users u
-     LEFT JOIN hospitals h ON h.id = u.hospital_id
-     WHERE u.pin_hash = ? AND u.deleted_at IS NULL LIMIT 1`,
+    'SELECT * FROM users WHERE pin_hash = ? AND deleted_at IS NULL LIMIT 1',
     [pinHash]
   );
   const user = rows[0];
@@ -171,13 +147,7 @@ export const loginPin = asyncHandler(async (req, res) => {
     user.id,
   ]);
 
-  await logAudit({
-    hospitalId: user.hospital_id,
-    userId: user.id,
-    action: 'LOGIN_PIN',
-    entityType: 'auth',
-    entityId: user.id,
-  });
+  await logAudit({ userId: user.id, action: 'LOGIN_PIN', entityType: 'auth', entityId: user.id });
 
   res.cookie(REFRESH_COOKIE_NAME, refreshToken, refreshCookieOptions());
 
@@ -185,11 +155,6 @@ export const loginPin = asyncHandler(async (req, res) => {
     accessToken,
     refreshToken,
     user: sanitizeUser(user),
-    hospitals: await listAccessibleHospitalsFor({
-      userId: user.id,
-      role: user.role,
-      hospitalId: user.hospital_id,
-    }),
     sessionExpiresAt: sessionExpiresAtOf(sessionStartedAt),
   });
 });
@@ -278,13 +243,7 @@ export const logout = asyncHandler(async (req, res) => {
     ]);
   }
 
-  await logAudit({
-    hospitalId: req.auth.hospitalId,
-    userId: req.auth.userId,
-    action: 'LOGOUT',
-    entityType: 'auth',
-    entityId: req.auth.userId,
-  });
+  await logAudit({ userId: req.auth.userId, action: 'LOGOUT', entityType: 'auth', entityId: req.auth.userId });
 
   res.clearCookie(REFRESH_COOKIE_NAME, refreshCookieOptions());
   return res.status(204).send();
@@ -296,9 +255,7 @@ export const logout = asyncHandler(async (req, res) => {
  */
 export const me = asyncHandler(async (req, res) => {
   const [rows] = await pool.query(
-    `SELECT u.*, h.name AS hospital_name FROM users u
-     LEFT JOIN hospitals h ON h.id = u.hospital_id
-     WHERE u.id = ? AND u.deleted_at IS NULL LIMIT 1`,
+    'SELECT * FROM users WHERE id = ? AND deleted_at IS NULL LIMIT 1',
     [req.auth.userId]
   );
   const user = rows[0];
@@ -309,7 +266,6 @@ export const me = asyncHandler(async (req, res) => {
 
   return res.json({
     user: sanitizeUser(user),
-    hospitals: await listAccessibleHospitals(req),
     permVersion: req.auth.permVersion,
     sessionExpiresAt: req.auth.sessionStartedAt ? sessionExpiresAtOf(req.auth.sessionStartedAt) : null,
   });

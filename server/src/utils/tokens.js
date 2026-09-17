@@ -8,12 +8,11 @@ import { env } from '../config/env.js';
 // session_started_at (unix seconds) = เวลา login ครั้งแรกของ "เซสชัน" นี้ ไม่เปลี่ยนตาม refresh
 // ที่ตามมา — ใช้บังคับเพดานอายุเซสชันรวม (SESSION_MAX_TTL_HOURS) แยกจากอายุ token แต่ละใบ
 // ดู authenticate.js middleware และ auth.controller.js#refresh
-export function signAccessToken({ userId, role, hospitalId, permVersion, sessionStartedAt }) {
+export function signAccessToken({ userId, role, permVersion, sessionStartedAt }) {
   return jwt.sign(
     {
       sub: String(userId),
       role,
-      hospital_id: hospitalId ?? null,
       perm_version: permVersion,
       session_started_at: sessionStartedAt,
     },
@@ -44,10 +43,4 @@ export function verifyRefreshToken(token) {
 // เก็บ hash ของ refresh token ลง DB แทนตัวจริง (กันกรณี DB รั่วแล้วใช้ token เดิม replay ได้ทันที)
 export function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
-}
-
-// Device token: opaque random string (ไม่ใช่ JWT) ให้ edge device ใช้ยิง POST /devices/:id/heartbeat
-// เห็น plaintext ได้ครั้งเดียวตอนออก/รีเซ็ต — เก็บแค่ hash ไว้เทียบ (ดู authenticateDevice.js)
-export function generateDeviceToken() {
-  return crypto.randomBytes(32).toString('hex');
 }

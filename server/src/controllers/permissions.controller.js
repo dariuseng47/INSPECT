@@ -2,7 +2,6 @@ import { pool } from '../db/pool.js';
 import { AppError } from '../utils/AppError.js';
 import { logAudit } from '../utils/auditLog.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { getUserScopeRows } from '../utils/userScopes.js';
 import { findTargetUser, assertCanManage } from './users.controller.js';
 import {
   hasPermission,
@@ -23,21 +22,17 @@ export const getMyPermissions = asyncHandler(async (req, res) => {
 
 /**
  * GET /api/v1/users/:id/permissions
- * คืน effective permissions + scope โรงพยาบาล + ธง handheld/สร้างพนักงาน ของ target ให้ครบ
- * เพื่อให้หน้าจอตั้งค่าสิทธิ์ (PermissionEditorDialog) แสดงได้ในที่เดียว
+ * คืน effective permissions + ธง handheld/สร้างพนักงาน ของ target ให้ครบ เพื่อให้หน้าจอ
+ * ตั้งค่าสิทธิ์ (PermissionEditorDialog) แสดงได้ในที่เดียว
  */
 export const getUserPermissions = asyncHandler(async (req, res) => {
   const targetUser = await findTargetUser(req.params.id);
   await assertCanManage(req.auth, targetUser);
 
-  const [permissions, scopes] = await Promise.all([
-    getEffectivePermissions(targetUser.id, targetUser.role),
-    getUserScopeRows(targetUser.id),
-  ]);
+  const permissions = await getEffectivePermissions(targetUser.id, targetUser.role);
 
   return res.json({
     permissions,
-    scopes,
     handheldEnabled: !!targetUser.handheld_enabled,
     canManageSubordinates: !!targetUser.can_manage_subordinates,
   });
@@ -117,7 +112,6 @@ export const updateUserPermissions = asyncHandler(async (req, res) => {
   await incrementPermVersion(targetUser.id);
 
   await logAudit({
-    hospitalId: targetUser.hospital_id,
     userId: req.auth.userId,
     action: 'PERMISSION_UPDATED',
     entityType: 'user',

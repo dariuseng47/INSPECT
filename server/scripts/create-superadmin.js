@@ -41,8 +41,8 @@ async function main() {
   }
 
   await pool.query(
-    `INSERT INTO users (hospital_id, role, username, password_hash, pin_hash, full_name, is_active)
-     VALUES (NULL, 'SUPERADMIN', ?, ?, ?, ?, TRUE)`,
+    `INSERT INTO users (role, username, password_hash, pin_hash, full_name, is_active)
+     VALUES ('SUPERADMIN', ?, ?, ?, ?, TRUE)`,
     [username, passwordHash, pinHash, fullName || username]
   );
 

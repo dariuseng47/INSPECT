@@ -4,10 +4,10 @@
 // ไม่ persist ลง DB เพราะไม่ต้องรอด surviving restart — ต่าง user ล็อกอินพร้อมกันหลาย tab/เครื่อง
 // นับ socketId แยกกัน ต้องหลุดครบทุกเส้นก่อนถึงจะเป็น offline จริง
 
-const onlineUsers = new Map(); // userId -> { hospitalId, role, socketIds: Set<string> }
+const onlineUsers = new Map(); // userId -> { socketIds: Set<string> }
 
-export function markOnline(userId, hospitalId, role, socketId) {
-  const entry = onlineUsers.get(userId) ?? { hospitalId, role, socketIds: new Set() };
+export function markOnline(userId, socketId) {
+  const entry = onlineUsers.get(userId) ?? { socketIds: new Set() };
   entry.socketIds.add(socketId);
   onlineUsers.set(userId, entry);
 }
@@ -27,10 +27,4 @@ export function markOffline(userId, socketId) {
 
 export function isOnline(userId) {
   return onlineUsers.has(userId);
-}
-
-export function getOnlineUserIds(hospitalId) {
-  return [...onlineUsers.entries()]
-    .filter(([, entry]) => entry.hospitalId === hospitalId)
-    .map(([userId]) => userId);
 }

@@ -63,7 +63,6 @@ export const create = asyncHandler(async (req, res) => {
   );
 
   await logAudit({
-    hospitalId: null,
     userId: req.auth.userId,
     action: 'LOGIN_POPUP_IMAGE_CREATED',
     entityType: 'login_popup_images',
@@ -123,7 +122,6 @@ export const update = asyncHandler(async (req, res) => {
   }
 
   await logAudit({
-    hospitalId: null,
     userId: req.auth.userId,
     action: 'LOGIN_POPUP_IMAGE_UPDATED',
     entityType: 'login_popup_images',
@@ -151,7 +149,6 @@ export const remove = asyncHandler(async (req, res) => {
   unlinkUploadedFile(existing.image_url);
 
   await logAudit({
-    hospitalId: null,
     userId: req.auth.userId,
     action: 'LOGIN_POPUP_IMAGE_DELETED',
     entityType: 'login_popup_images',
